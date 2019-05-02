@@ -1,5 +1,5 @@
 #[derive(Copy, Clone)]
-#[repr(u8)]
+//#[repr(u8)]
 pub enum PieceType {
     None = 0,       // if(Piece)
     WPawn = 1,      // all odd can move diagonally
@@ -18,19 +18,35 @@ pub enum PieceType {
     BAny = 15
 }
 
-type Coord88 = u8;
+pub type Coord0x88 = std::num::Wrapping<usize>;
+pub type Coord8x8 = usize;
 
-struct Unmake {
-    from: Coord88,
-    tp: Coord88,
-    captured: PieceType
+pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
+    (sq0x88.0 + (sq0x88.0 & 0x7)) >> 1
+}
+pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
+    std::num::Wrapping(sq8x8 + (sq8x8 & 0xF8))
+}
+
+pub struct Move {
+    from: Coord0x88,
+    to: Coord0x88,
+    promote_to: PieceType
+}
+
+pub struct Unmove {
+    from: Coord0x88,
+    to: Coord0x88,
+    captured: PieceType,
+    promoted: bool,
+
 }
 
 pub struct Board {
     // Mailbox: 0x88
     mailbox: [PieceType; 128],
     bitboards: [u64; 16],
-    unmake_stack: Vec<Unmake>
+    unmake_stack: Vec<Unmove>
 
 }
 
@@ -55,5 +71,18 @@ impl Board {
 
             unmake_stack: Vec::new()
         }
+    }
+
+    pub fn make(&mut self, cmove: Move) {
+        // First add the information to undo the move to the stack
+        self.unmake_stack.push( Unmove{
+            from: cmove.from,
+            to: cmove.to,
+            captured: self.mailbox[cmove.to.0],
+            promoted: false,
+        });
+
+        // Now move the piece on the mailbox
+        self.mailbox[cmove.to.0] = self.mailbox[cmove.from.0];
     }
 }
