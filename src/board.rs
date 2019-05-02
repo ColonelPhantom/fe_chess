@@ -17,6 +17,9 @@ pub enum PieceType {
     BKing = 14,
     BAny = 15
 }
+impl Default for PieceType {
+    fn default() -> Self { PieceType::None }
+}
 
 pub type Coord0x88 = std::num::Wrapping<usize>;
 pub type Coord8x8 = usize;
