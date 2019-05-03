@@ -1,11 +1,16 @@
+#[macro_use]
 mod board;
+
+mod movegen;
 
 fn main() {
     println!("Hello, world!");
 
-    let b = board::Board::new_board_startpos();
+    let mut b = board::Board::new_board_startpos();
 
-    let mut a = std::num::Wrapping(0usize);
-    a -= std::num::Wrapping(1usize);
-    println!("{}",a);
+    b.make(board::Move {
+        from: std::num::Wrapping(17),
+        to: std::num::Wrapping(27),
+        promote_to: board::pieces::NONE
+    });
 }
