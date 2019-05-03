@@ -1,3 +1,5 @@
+use std::num::Wrapping;
+
 #[derive(Copy, Clone)]
 //#[repr(u8)]
 #[derive(PartialEq)]
@@ -29,13 +31,13 @@ pub type Coord8x8 = usize;
 
 // c0x88:h1 is a number now
 #[allow(non_upper_case_globals)] #[allow(dead_code)] pub mod c0x88;
-pub fn c0x88(file: isize, rank: isize) -> isize {
-    16 * rank + file
+pub fn c0x88(file: isize, rank: isize) -> Coord0x88 {
+    Wrapping(16 * rank as usize) + Wrapping( file as usize )
 }
 
 // allow (-1, 1) format to determine offset from file and rank difference (same order as h5 but with ints)
-pub fn o0x88(file: isize, rank: isize) -> isize {
-    (rank * 0x10) + file
+pub fn o0x88(file: isize, rank: isize) -> Coord0x88 {
+    Wrapping(((rank * 0x10) + file) as usize)
 } 
 
 pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {

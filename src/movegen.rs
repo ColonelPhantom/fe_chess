@@ -1,34 +1,43 @@
 use crate::board;
-use board::Piece;
-use board::PieceType;
+use board::*;
 
-fn movegen(b: board::Board) {
-    let moves: Vec<board::Move>;
+fn move_std(from: Coord0x88, to: Coord0x88) -> Move {
+    Move{
+        from: from,
+        to: to,
+        promote_to: pieces::NONE
+    }
+}
+
+fn movegen(b: Board) {
+    let mut moves: Vec<Move> = vec![];
     for file in 0..7 {
         for rank in 0..7 {
-            let c = board::c0x88(file,rank);
-            let p: Piece = b.mailbox[c as usize];
+            let c: Coord0x88 = c0x88(file,rank);
+            let p: Piece = b.mailbox[c.0];
             match p.piece_type {
                 PieceType::None => {},
                 PieceType::Any => {},
                 PieceType::Pawn => {
                     match p.color {
-                        board::WHITE => {
-                            if !b.occupied(std::num::Wrapping( (c + board::o0x88(0,1)) as usize)) {
+                        WHITE => {
+                            if !b.occupied(c + o0x88(0,1)) {
                                 // Piece can move ahead
                                 if rank == 7 {
-                                    moves.push(board::Move{})
+                                    moves.push(move_std(
+                                        c, c + o0x88(0,1)
+                                    ));
                                 }
-                                moves.push(board::Move {
+                                //moves.push(Move {
                                     
-                                });
+                                //});
                                 if rank == 2  {
 
                                 }
                             }
                             
                         },
-                        board::BLACK => {
+                        BLACK => {
 
                         }
                     }
