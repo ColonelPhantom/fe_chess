@@ -14,70 +14,29 @@ pub enum PieceType {
 impl Default for PieceType {
     fn default() -> Self { PieceType::None }
 }
-
 type Side = bool;
 pub const WHITE: Side = false;
 pub const BLACK: Side = true;
-
 #[derive(Copy, Clone)]
 pub struct Piece {
     pub piece_type: PieceType,
     pub color: Side
 }
-
-pub mod pieces {
-    use super::*;
-    use PieceType::*;
-    //use Side::*;
-    pub const NONE: Piece = Piece {piece_type:PieceType::None, color:WHITE};
-    pub const WPAWN: Piece = Piece {piece_type:Pawn, color: WHITE};
-    pub const WKNIGHT: Piece = Piece {piece_type:Knight, color: WHITE};
-    pub const WBISHOP: Piece = Piece {piece_type:Bishop, color: WHITE};
-    pub const WROOK: Piece = Piece {piece_type:Rook, color: WHITE};
-    pub const WQUEEN: Piece = Piece {piece_type:Queen, color: WHITE};
-    pub const WKING: Piece = Piece {piece_type:King, color: WHITE};
-    pub const BPAWN: Piece = Piece {piece_type:Pawn, color: BLACK};
-    pub const BKNIGHT: Piece = Piece {piece_type:Knight, color: BLACK};
-    pub const BBISHOP: Piece = Piece {piece_type:Bishop, color: BLACK};
-    pub const BROOK: Piece = Piece {piece_type:Rook, color: BLACK};
-    pub const BQUEEN: Piece = Piece {piece_type:Queen, color: BLACK};
-    pub const BKING: Piece = Piece {piece_type:King, color: BLACK};
-
-    
-}
+pub mod pieces;
 
 pub type Coord0x88 = std::num::Wrapping<usize>;
 pub type Coord8x8 = usize;
 
-// h5 format to 0x88 index
-#[macro_export]
-macro_rules! c0x88 {
-    (a $rank:expr) => {$rank-1 + 0x00};
-    (b $rank:expr) => {$rank-1 + 0x10};
-    (c $rank:expr) => {$rank-1 + 0x20};
-    (d $rank:expr) => {$rank-1 + 0x30};
-    (e $rank:expr) => {$rank-1 + 0x40};
-    (f $rank:expr) => {$rank-1 + 0x50};
-    (g $rank:expr) => {$rank-1 + 0x60};
-    (h $rank:expr) => {$rank-1 + 0x70};
-
-    (1 $rank:expr) => {$rank-1 + 0x00};
-    (2 $rank:expr) => {$rank-1 + 0x10};
-    (3 $rank:expr) => {$rank-1 + 0x20};
-    (4 $rank:expr) => {$rank-1 + 0x30};
-    (5 $rank:expr) => {$rank-1 + 0x40};
-    (6 $rank:expr) => {$rank-1 + 0x50};
-    (7 $rank:expr) => {$rank-1 + 0x60};
-    (8 $rank:expr) => {$rank-1 + 0x70};
+// c0x88:h1 is a number now
+#[allow(non_upper_case_globals)] #[allow(dead_code)] pub mod c0x88;
+pub fn c0x88(file: isize, rank: isize) -> isize {
+    16 * rank + file
 }
 
 // allow (-1, 1) format to determine offset from file and rank difference (same order as h5 but with ints)
-#[macro_export]
-macro_rules! o0x88 {
-    ($file:expr, $rank:expr) => {
-        (rank * 0x10) + file
-    }
-}
+pub fn o0x88(file: isize, rank: isize) -> isize {
+    (rank * 0x10) + file
+} 
 
 pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
     (sq0x88.0 + (sq0x88.0 & 0x7)) >> 1
@@ -85,6 +44,10 @@ pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
 pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
     std::num::Wrapping(sq8x8 + (sq8x8 & 0xF8))
 }
+
+
+
+
 
 pub struct Move {
     pub from: Coord0x88,
@@ -135,7 +98,7 @@ impl Board {
     pub fn make(&mut self, cmove: Move) {
         // Begin with determining info on the move
         let captured: Piece = self.mailbox[cmove.to.0];
-        if self.mailbox[cmove.from.0].piece_type == PieceType::Pawn && (cmove.to.0 > c0x88!(h 1)) {
+        if self.mailbox[cmove.from.0].piece_type == PieceType::Pawn && (cmove.to > c0x88::h1) {
             
         }
 
@@ -162,5 +125,15 @@ impl Board {
             self.mailbox[u.from.0] = self.mailbox[u.to.0];
         }
         self.mailbox[u.to.0] = u.captured;
+    }
+
+
+
+    // Helper functions
+    pub fn occupied(&self, c: Coord0x88) -> bool {
+        match self.mailbox[c.0].piece_type {
+            PieceType::None => false,
+            _ => true
+        }
     }
 }
