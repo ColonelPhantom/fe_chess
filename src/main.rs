@@ -6,7 +6,7 @@ mod movegen;
 fn main() {
     println!("Hello, world!");
 
-    let mut b = board::Board::new_board_startpos();
+    let mut b = board::Board::new();
 
     movegen::movegen(&b);
 

@@ -73,7 +73,7 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn new_board_startpos() -> Board {
+    pub fn new() -> Board {
         //use PieceType::{None, WPawn, WKnight, WBishop, WRook, WQueen, WKing, BPawn, BKnight, BBishop, BRook, BQueen, BKing};
         use pieces::*;
         Board {
