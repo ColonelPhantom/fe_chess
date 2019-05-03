@@ -99,11 +99,14 @@ impl Board {
 
     pub fn make(&mut self, cmove: Move) {
         // Begin with determining info on the move
-        let captured: Piece = self.mailbox[cmove.to.0];
-        if self.mailbox[cmove.from.0].piece_type == PieceType::Pawn && (cmove.to > c0x88::h1) {
+        let captured: Piece = self[cmove.to];
+
+        // Test for pawn promotion
+        if self[cmove.from].piece_type == PieceType::Pawn && (cmove.to >= c0x88::h1) {
             
         }
 
+        //Time to do the move
         // First add the information to undo the move to the stack
         self.unmake_stack.push( Unmove{
             from: cmove.from,
@@ -113,8 +116,8 @@ impl Board {
         });
 
         // Now move the piece on the mailbox
-        self.mailbox[cmove.to.0] = self.mailbox[cmove.from.0];
-        self.mailbox[cmove.from.0] = pieces::NONE;
+        self[cmove.to] = self[cmove.from];
+        self[cmove.from] = pieces::NONE;
 
         self.side_to_move = !self.side_to_move;
     }
@@ -122,20 +125,34 @@ impl Board {
     pub fn unmake(&mut self) {
         let u = self.unmake_stack.pop().unwrap();
         if u.promoted {
-            self.mailbox[u.from.0] = Piece{piece_type: PieceType::Pawn, color: self.side_to_move};
+            self[u.from] = Piece{piece_type: PieceType::Pawn, color: self.side_to_move};
         } else {
-            self.mailbox[u.from.0] = self.mailbox[u.to.0];
+            self[u.from] = self[u.to];
         }
-        self.mailbox[u.to.0] = u.captured;
+        self[u.to] = u.captured;
     }
 
 
 
     // Helper functions
     pub fn occupied(&self, c: Coord0x88) -> bool {
-        match self.mailbox[c.0].piece_type {
+        match self[c].piece_type {
             PieceType::None => false,
             _ => true
         }
+    }
+}
+
+impl std::ops::Index<Coord0x88> for Board {
+    type Output = Piece;
+
+    fn index(&self, c: Coord0x88) -> &Piece {
+        &self.mailbox[c.0]
+    }
+}
+
+impl std::ops::IndexMut<Coord0x88> for Board {
+    fn index_mut(&mut self, c: Coord0x88) -> &mut Piece {
+        &mut self.mailbox[c.0]
     }
 }

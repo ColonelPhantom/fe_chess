@@ -9,12 +9,12 @@ fn move_std(from: Coord0x88, to: Coord0x88) -> Move {
     }
 }
 
-fn movegen(b: Board) {
+pub fn movegen(b: &Board) {
     let mut moves: Vec<Move> = vec![];
     for file in 0..7 {
         for rank in 0..7 {
             let c: Coord0x88 = c0x88(file,rank);
-            let p: Piece = b.mailbox[c.0];
+            let p: Piece = b[c];
             match p.piece_type {
                 PieceType::None => {},
                 PieceType::Any => {},

@@ -8,6 +8,9 @@ fn main() {
 
     let mut b = board::Board::new_board_startpos();
 
+    movegen::movegen(&b);
+
+
     b.make(board::Move {
         from: std::num::Wrapping(17),
         to: std::num::Wrapping(27),
