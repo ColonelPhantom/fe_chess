@@ -11,9 +11,6 @@ fn main() {
     movegen::movegen(&b);
 
 
-    b.make(board::Move {
-        from: std::num::Wrapping(17),
-        to: std::num::Wrapping(27),
-        promote_to: board::pieces::NONE
-    });
+    b.make(board::Move::new(board::c0x88::e2, board::c0x88::e4));
+    b.unmake();
 }

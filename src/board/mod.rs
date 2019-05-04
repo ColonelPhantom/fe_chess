@@ -16,7 +16,7 @@ pub enum PieceType {
 impl Default for PieceType {
     fn default() -> Self { PieceType::None }
 }
-type Side = bool;
+pub type Side = bool;
 pub const WHITE: Side = false;
 pub const BLACK: Side = true;
 #[derive(Copy, Clone)]
@@ -54,7 +54,20 @@ pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
 pub struct Move {
     pub from: Coord0x88,
     pub to: Coord0x88,
-    pub promote_to: Piece,
+    pub promote_to: PieceType,
+    pub en_passant: Option<Coord0x88>,
+    pub ep_capture: bool,
+}
+impl Move {
+    pub fn new(from: Coord0x88, to: Coord0x88) -> Move {
+        Move {
+            from: from,
+            to: to,
+            promote_to: PieceType::None,
+            en_passant: None,
+            ep_capture: false,
+        }
+    }
 }
 
 pub struct Unmove {
@@ -65,11 +78,15 @@ pub struct Unmove {
 
 }
 
+
+
 pub struct Board {
     pub mailbox: [Piece; 128],      // 0x88
     //pub bitboards: [u64; 16],
     pub unmake_stack: Vec<Unmove>,
     pub side_to_move: Side,
+    pub en_passant: Option<Coord0x88>,
+    pub revmov_clock: usize,
 }
 
 impl Board {
@@ -94,6 +111,10 @@ impl Board {
             unmake_stack: Vec::new(),
 
             side_to_move: WHITE,
+
+            revmov_clock: 0,
+
+            en_passant: None
         }
     }
 
@@ -142,7 +163,6 @@ impl Board {
         }
     }
 }
-
 impl std::ops::Index<Coord0x88> for Board {
     type Output = Piece;
 
@@ -150,7 +170,6 @@ impl std::ops::Index<Coord0x88> for Board {
         &self.mailbox[c.0]
     }
 }
-
 impl std::ops::IndexMut<Coord0x88> for Board {
     fn index_mut(&mut self, c: Coord0x88) -> &mut Piece {
         &mut self.mailbox[c.0]
