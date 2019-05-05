@@ -1,8 +1,7 @@
 use std::num::Wrapping;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 //#[repr(u8)]
-#[derive(PartialEq)]
 pub enum PieceType {
     None = 0,
     Pawn = 1,
@@ -50,7 +49,7 @@ pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
 
 
 
-
+#[derive(Debug)]
 pub struct Move {
     pub from: Coord0x88,
     pub to: Coord0x88,

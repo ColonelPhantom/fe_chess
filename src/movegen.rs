@@ -1,30 +1,47 @@
 use crate::board;
 use board::*;
 
-fn gen_promotions(from: Coord0x88, to: Coord0x88) -> Vec<Move> {
-    vec![
-        Move{from: from, to:to, promote_to: PieceType::Knight, en_passant: None, ep_capture: false},
-        Move{from: from, to:to, promote_to: PieceType::Bishop, en_passant: None, ep_capture: false},
-        Move{from: from, to:to, promote_to: PieceType::Rook, en_passant: None, ep_capture: false},
-        Move{from: from, to:to, promote_to: PieceType::Queen, en_passant: None, ep_capture: false},
-    ]
+fn gen_sliding(b: &Board, from: Coord0x88, offset: Coord0x88, side: Side) -> Vec<Move> {
+    let mut moves: Vec<Move> = vec![];
+    let mut c = from + offset;
+    while c.0 & 0x88 == 0 {
+        if b.occupied(c) {
+            if b[c].color != side {
+                moves.push(Move::new(from, c));
+            }
+            break;
+        } else {
+            moves.push(Move::new(from, c));
+        }
+        c += offset;
+    }
+    return moves;
 }
 
-pub fn movegen(b: &Board) {
+pub fn movegen(b: &Board) -> Vec<Move> {
     let mut moves: Vec<Move> = vec![];
-    for file in 0..7 { for rank in 0..7 {
+    for rank in 0..8 { for file in 0..8 { 
         let c: Coord0x88 = c0x88(file,rank);
         let p: Piece = b[c];
+        if p.color != b.side_to_move { continue; }   // Piece not of side to move: cannot move
         match p.piece_type {
             PieceType::None => {},
             PieceType::Any => {},
             PieceType::Pawn => {
+                macro_rules! gen_promotions {
+                    ($from:expr, $to:expr) => {
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Knight, en_passant: None, ep_capture: false});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Bishop, en_passant: None, ep_capture: false});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Rook, en_passant: None, ep_capture: false});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Queen, en_passant: None, ep_capture: false});                        
+                    };
+                }
                 match p.color {
                     WHITE => {
                         // Move ahead
                         if !b.occupied(c + o0x88(0,1)) {
                             if rank == 6 {  // 6 is second last
-                                moves.extend(gen_promotions( c, c+o0x88(0,1)));
+                                gen_promotions!(c, c+o0x88(0, 1));
                             } else {
                                 moves.push( Move::new( c, c+o0x88(0,1) ) );
                                 if rank == 1 && !b.occupied( c + o0x88(0,2)) {
@@ -57,7 +74,7 @@ pub fn movegen(b: &Board) {
                         // Move ahead
                         if !b.occupied(c + o0x88(0,-1)) {
                             if rank == 7-6 {  // 6 is second last
-                                moves.extend(gen_promotions( c, c+o0x88(0,-1)));
+                                gen_promotions!(c, c+o0x88(0, -1));
                             } else {
                                 moves.push( Move::new( c, c+o0x88(0,-1) ) );
                                 if rank == 7-1 && !b.occupied( c + o0x88(0,-2)) {
@@ -89,20 +106,59 @@ pub fn movegen(b: &Board) {
                 }
             },
             PieceType::Knight => {
-
+                macro_rules! nonslide_move { ($to:expr) => {
+                    if $to.0 & 0x88 == 0 && (!b.occupied($to) || b[$to].color != p.color ) {
+                        moves.push(Move::new(c, $to));
+                    }
+                };}
+                nonslide_move!(c+o0x88( 1,  2));
+                nonslide_move!(c+o0x88(-1,  2));
+                nonslide_move!(c+o0x88( 1, -2));
+                nonslide_move!(c+o0x88(-1, -2));
+                nonslide_move!(c+o0x88( 2,  1));
+                nonslide_move!(c+o0x88(-2,  1));
+                nonslide_move!(c+o0x88( 2, -1));
+                nonslide_move!(c+o0x88(-2, -1));
             },
-            PieceType::Bishop => {
 
+            PieceType::Bishop => {
+                moves.extend(gen_sliding(b, c, o0x88( 1,  1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 1, -1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88(-1,  1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88(-1, -1), p.color));
             },
             PieceType::Rook => {
-
+                moves.extend(gen_sliding(b, c, o0x88( 1,  0), p.color));
+                moves.extend(gen_sliding(b, c, o0x88(-1,  0), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 0,  1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 0, -1), p.color));
             },
             PieceType::Queen => {
-
+                moves.extend(gen_sliding(b, c, o0x88( 1,  1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 1, -1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88(-1,  1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88(-1, -1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 1,  0), p.color));
+                moves.extend(gen_sliding(b, c, o0x88(-1,  0), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 0,  1), p.color));
+                moves.extend(gen_sliding(b, c, o0x88( 0, -1), p.color));
             },
             PieceType::King => {
-
+                macro_rules! nonslide_move { ($to:expr) => {
+                    if $to.0 & 0x88 == 0 && (!b.occupied($to) || b[$to].color != p.color ) {
+                        moves.push(Move::new(c, $to));
+                    }
+                };}
+                nonslide_move!(c+o0x88( 1,  1));
+                nonslide_move!(c+o0x88( 1, -1));
+                nonslide_move!(c+o0x88(-1,  1));
+                nonslide_move!(c+o0x88(-1, -1));
+                nonslide_move!(c+o0x88( 1,  0));
+                nonslide_move!(c+o0x88(-1,  0));
+                nonslide_move!(c+o0x88( 0,  1));
+                nonslide_move!(c+o0x88( 0, -1));
             }
         }
     }}
+    return moves;
 } 
