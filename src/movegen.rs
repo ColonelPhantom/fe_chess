@@ -2,7 +2,7 @@ use crate::board;
 use board::*;
 
 pub fn movegen(b: &Board) -> Vec<Move> {
-    let mut moves: Vec<Move> = vec![];
+    let mut moves: Vec<Move> = Vec::with_capacity(218);
     for rank in 0..8 { for file in 0..8 { 
         let c: Coord0x88 = c0x88(file,rank);
         let p: Piece = b[c];
