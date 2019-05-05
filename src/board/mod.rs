@@ -143,6 +143,7 @@ impl Board {
     }
     
     pub fn unmake(&mut self) {
+        self.side_to_move = !self.side_to_move;
         let u = self.unmake_stack.pop().unwrap();
         if u.promoted {
             self[u.from] = Piece{piece_type: PieceType::Pawn, color: self.side_to_move};

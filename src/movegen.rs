@@ -69,6 +69,15 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 ep_capture: true,
                             })
                         }
+                        // Regular capture
+                        let lcap_c = c+o0x88(-1, 1);
+                        if b.occupied(lcap_c) && b[lcap_c].color != p.color {
+                            moves.push(Move::new(c, lcap_c));
+                        }
+                        let rcap_c = c+o0x88(-1, 1);
+                        if b.occupied(rcap_c) && b[rcap_c].color != p.color {
+                            moves.push(Move::new(c, rcap_c));
+                        }
                     },
                     BLACK => {
                         // Move ahead
