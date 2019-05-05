@@ -6,8 +6,8 @@ mod movegen;
 fn perft(b: &mut board::Board, depth: usize) -> usize {
     let mut perft_count = 0;
 
-    if depth == 0 {
-        return 1;
+    if depth == 1 {
+        return movegen::movegen(b).len();
     }
 
 
