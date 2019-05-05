@@ -120,10 +120,16 @@ impl Board {
     pub fn make(&mut self, cmove: Move) {
         // Begin with determining info on the move
         let captured: Piece = self[cmove.to];
+        let promoted;
 
-        // Test for pawn promotion
-        if self[cmove.from].piece_type == PieceType::Pawn && (cmove.to >= c0x88::h1) {
+        // Pawn promotion
+        if cmove.promote_to != PieceType::None {
+            self[cmove.to] = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
+            self[cmove.from] = pieces::NONE;
+            promoted = true;
             
+        } else {
+            promoted = false;
         }
 
         //Time to do the move
@@ -132,7 +138,7 @@ impl Board {
             from: cmove.from,
             to: cmove.to,
             captured: captured,
-            promoted: false,
+            promoted: promoted,
         });
 
         // Now move the piece on the mailbox
