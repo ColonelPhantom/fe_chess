@@ -1,2 +1,7 @@
 /target
 **/*.rs.bk
+
+# Perf and callgrind
+perf.data
+perf.data.old
+callgrind.out.*
