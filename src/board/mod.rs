@@ -46,6 +46,12 @@ pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
     std::num::Wrapping(sq8x8 + (sq8x8 & 0xF8))
 }
 
+pub enum ThreatInfo {
+    Safe,
+    Single { c: Coord0x88 },
+    Multiple { c: Vec<Coord0x88> },
+}
+
 
 
 
@@ -86,6 +92,7 @@ pub struct Board {
     pub side_to_move: Side,
     pub en_passant: Option<Coord0x88>,
     pub revmov_clock: usize,
+    pub king_pos: [Coord0x88; 2],
 }
 
 impl Board {
@@ -113,7 +120,9 @@ impl Board {
 
             revmov_clock: 0,
 
-            en_passant: None
+            en_passant: None,
+
+            king_pos: [c0x88::e1, c0x88::e8],
         }
     }
 
@@ -167,6 +176,84 @@ impl Board {
             PieceType::None => false,
             _ => true
         }
+    }
+
+    pub fn under_attack(&self, c: Coord0x88, side: Side) -> ThreatInfo {
+        let mut threats: Vec<Coord0x88> = vec![];
+        
+        macro_rules! nonslide_threat {
+            ($offset:expr, $types:pat) => {
+                let to = c+$offset;
+                if to.0 & 0x88 == 0 && self.occupied(to) && self[to].color != side {
+                    match self[to].piece_type {
+                        $types => { threats.push(to) }
+                        _ => {}
+                    }
+                }
+            };
+        }
+
+        macro_rules! slide_threat {
+           ($offset:expr, $types:pat) => 
+           {
+                let mut to = c+$offset;
+                if self[to].piece_type == PieceType::King && self[to].color != side {
+                    threats.push(to);
+                } else {
+                    while to.0 & 0x88 == 0 && !self.occupied(to) {
+                        to += $offset;
+                    }
+                    if self[to].color != side {
+                        match self[to].piece_type {
+                            $types | PieceType::Queen => { threats.push(to) }
+                            _ => {}
+                        }
+                    }
+                }
+           }
+        }
+        
+
+        // Pawns
+        match side {
+            WHITE => {
+                nonslide_threat!(o0x88( 1,  1), PieceType::Pawn);
+                nonslide_threat!(o0x88(-1,  1), PieceType::Pawn);
+            }
+            BLACK => {
+                nonslide_threat!(o0x88( 1, -1), PieceType::Pawn);
+                nonslide_threat!(o0x88(-1, -1), PieceType::Pawn);
+            }
+        }
+        // Knights
+        nonslide_threat!(o0x88( 1,  2), PieceType::Knight);
+        nonslide_threat!(o0x88(-1,  2), PieceType::Knight);
+        nonslide_threat!(o0x88( 1, -2), PieceType::Knight);
+        nonslide_threat!(o0x88(-1, -2), PieceType::Knight);
+        nonslide_threat!(o0x88( 2,  1), PieceType::Knight);
+        nonslide_threat!(o0x88(-2,  1), PieceType::Knight);
+        nonslide_threat!(o0x88( 2, -1), PieceType::Knight);
+        nonslide_threat!(o0x88(-2, -1), PieceType::Knight);
+
+        // Diagonal (bishop + queen)
+        slide_threat!(o0x88( 1,  1), PieceType::Bishop);
+        slide_threat!(o0x88( 1, -1), PieceType::Bishop);
+        slide_threat!(o0x88(-1,  1), PieceType::Bishop);
+        slide_threat!(o0x88(-1, -1), PieceType::Bishop);
+
+        // Hor/vertical (rook + queen)
+        slide_threat!(o0x88( 1,  0), PieceType::Rook);
+        slide_threat!(o0x88(-1,  0), PieceType::Rook);
+        slide_threat!(o0x88( 0,  1), PieceType::Rook);
+        slide_threat!(o0x88( 0, -1), PieceType::Rook);
+
+
+        return ThreatInfo::Safe;
+
+    }
+
+    pub fn is_check(&self, side: Side) -> ThreatInfo {
+        self.under_attack(self.king_pos[side as usize], side)
     }
 }
 impl std::ops::Index<Coord0x88> for Board {
