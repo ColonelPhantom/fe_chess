@@ -97,7 +97,6 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Board {
-        //use PieceType::{None, WPawn, WKnight, WBishop, WRook, WQueen, WKing, BPawn, BKnight, BBishop, BRook, BQueen, BKing};
         use pieces::*;
         Board {
             mailbox: [
@@ -131,6 +130,13 @@ impl Board {
         let captured: Piece = self[cmove.to];
         let promoted;
 
+        if self[cmove.from].piece_type == PieceType::King {
+            // TODO: remove castling rights
+
+            // Update kingpos
+            self.king_pos[self.side_to_move as usize] = cmove.to;
+        }
+
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
             self[cmove.to] = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
@@ -138,6 +144,8 @@ impl Board {
             promoted = true;
             
         } else {
+            self[cmove.to] = self[cmove.from];
+            self[cmove.from] = pieces::NONE;
             promoted = false;
         }
 
@@ -150,11 +158,10 @@ impl Board {
             promoted: promoted,
         });
 
-        // Now move the piece on the mailbox
-        self[cmove.to] = self[cmove.from];
-        self[cmove.from] = pieces::NONE;
+
 
         self.side_to_move = !self.side_to_move;
+        self.revmov_clock += 1;
     }
     
     pub fn unmake(&mut self) {
