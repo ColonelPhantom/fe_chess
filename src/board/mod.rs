@@ -135,7 +135,7 @@ impl Board {
         }
     }
 
-    pub fn make(&mut self, cmove: Move) {
+    pub fn make(&mut self, cmove: &Move) {
         // Begin with determining info on the move
         let captured: Piece = self[cmove.to];
         let promoted;
@@ -251,46 +251,35 @@ impl Board {
     pub fn under_attack(&self, c: Coord0x88, side: Side) -> ThreatInfo {
         let mut threats: Vec<Coord0x88> = vec![];
         
-        macro_rules! nonslide_threat {
-            ($offset:expr, $types:pat) => {
-                let to = c+$offset;
-                if to.0 & 0x88 == 0 && self.occupied(to) && self[to].color != side {
-                    match self[to].piece_type {
-                        $types => { threats.push(to) }
-                        _ => {}
-                    }
+        macro_rules! nonslide_threat {($offset:expr, $types:pat) => {
+            let to = c+$offset;
+            if to.0 & 0x88 == 0 && self.occupied(to) && self[to].color != side {
+                match self[to].piece_type {
+                    $types => { threats.push(to) }
+                    _ => {}
                 }
-            };
-        }
+            }
+        };}
 
-        macro_rules! slide_threat {
-           ($offset:expr, $types:pat) => 
-           {
-                let mut to = c+$offset;
-                if to.0 & 0x88 == 0 && self[to].piece_type == PieceType::King && self[to].color != side {
-                    threats.push(to);
-                } else {
-                    while to.0 & 0x88 == 0 {
-                        if self.occupied(to) {
-                            if self[to].color != side {
-                                match self[to].piece_type {
-                                    $types | PieceType::Queen => { threats.push(to) }
-                                    _ => {}
-                                }
+        macro_rules! slide_threat { ($offset:expr, $types:pat) =>  {
+            let mut to = c+$offset;
+            if to.0 & 0x88 == 0 && self[to].piece_type == PieceType::King && self[to].color != side {
+                threats.push(to);
+            } else {
+                while to.0 & 0x88 == 0 {
+                    if self.occupied(to) {
+                        if self[to].color != side {
+                            match self[to].piece_type {
+                                $types | PieceType::Queen => { threats.push(to) }
+                                _ => {}
                             }
-                            break;
                         }
-                        to += $offset;
+                        break;
                     }
-                    if to.0 & 0x88 == 0 && self[to].color != side {
-                        match self[to].piece_type {
-                            $types | PieceType::Queen => { threats.push(to) }
-                            _ => {}
-                        }
-                    }
+                    to += $offset;
                 }
-           }
-        }
+            }
+        }}
         
 
         // Pawns
