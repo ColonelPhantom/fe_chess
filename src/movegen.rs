@@ -38,10 +38,10 @@ pub fn movegen(b: &Board) -> Vec<Move> {
             PieceType::Pawn => {
                 macro_rules! gen_promotions {
                     ($from:expr, $to:expr) => {
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Knight, en_passant: None, ep_capture: false});
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Bishop, en_passant: None, ep_capture: false});
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Rook, en_passant: None, ep_capture: false});
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Queen, en_passant: None, ep_capture: false});                        
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Knight, en_passant: EnPassantState::None});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Bishop, en_passant: EnPassantState::None});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Rook, en_passant: EnPassantState::None});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Queen, en_passant: EnPassantState::None});                        
                     };
                 }
                 match p.color {
@@ -57,8 +57,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                     moves.push( Move {
                                         from: c, to: c+o0x88(0,2),
                                         promote_to: PieceType::None,
-                                        en_passant: Some( c+o0x88(0,1) ),
-                                        ep_capture: false
+                                        en_passant: EnPassantState::Possible( c+o0x88(0,1) ),
                                     });
                                 }
                             }
@@ -73,8 +72,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 from: c,
                                 to: b.en_passant.unwrap(),
                                 promote_to: PieceType::None,
-                                en_passant: None,
-                                ep_capture: true,
+                                en_passant: EnPassantState::Capture,
                             })
                         }
                         // Regular capture
@@ -99,8 +97,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                     moves.push( Move {
                                         from: c, to: c+o0x88(0,-2),
                                         promote_to: PieceType::None,
-                                        en_passant: Some( c+o0x88(0,-1) ),
-                                        ep_capture: false
+                                        en_passant: EnPassantState::Possible( c+o0x88(0,-1) ),
                                     });
                                 }
                             }
@@ -115,8 +112,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 from: c,
                                 to: b.en_passant.unwrap(),
                                 promote_to: PieceType::None,
-                                en_passant: None,
-                                ep_capture: true,
+                                en_passant: EnPassantState::Capture,
                             })
                         }
                     }

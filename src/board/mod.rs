@@ -55,14 +55,19 @@ pub enum ThreatInfo {
 
 
 
+#[derive(Debug)]
+pub enum EnPassantState {
+    None,
+    Possible ( Coord0x88 ),
+    Capture,
+}
 
 #[derive(Debug)]
 pub struct Move {
     pub from: Coord0x88,
     pub to: Coord0x88,
     pub promote_to: PieceType,
-    pub en_passant: Option<Coord0x88>,
-    pub ep_capture: bool,
+    pub en_passant: EnPassantState,
 }
 impl Move {
     pub fn new(from: Coord0x88, to: Coord0x88) -> Move {
@@ -70,8 +75,7 @@ impl Move {
             from: from,
             to: to,
             promote_to: PieceType::None,
-            en_passant: None,
-            ep_capture: false,
+            en_passant: EnPassantState::None,
         }
     }
 }
