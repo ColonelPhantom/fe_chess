@@ -18,8 +18,8 @@ pub fn movegen(b: &Board) -> Vec<Move> {
             ($offset:expr) => {
                 let mut to = c + $offset;
                 while to.0 & 0x88 == 0 {
-                    if b.occupied(c) {
-                        if b[c].color != p.color {
+                    if b.occupied(to) {
+                        if b[to].color != p.color {
                             moves.push(Move::new(c, to));
                         }
                         break;
@@ -80,7 +80,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                         if b.occupied(lcap_c) && b[lcap_c].color != p.color {
                             moves.push(Move::new(c, lcap_c));
                         }
-                        let rcap_c = c+o0x88(-1, 1);
+                        let rcap_c = c+o0x88( 1, 1);
                         if b.occupied(rcap_c) && b[rcap_c].color != p.color {
                             moves.push(Move::new(c, rcap_c));
                         }
@@ -114,6 +114,15 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 promote_to: PieceType::None,
                                 en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
                             })
+                        }
+                        // Regular capture
+                        let lcap_c = c+o0x88(-1, -1);
+                        if b.occupied(lcap_c) && b[lcap_c].color != p.color {
+                            moves.push(Move::new(c, lcap_c));
+                        }
+                        let rcap_c = c+o0x88( 1, -1);
+                        if b.occupied(rcap_c) && b[rcap_c].color != p.color {
+                            moves.push(Move::new(c, rcap_c));
                         }
                     }
                 }
