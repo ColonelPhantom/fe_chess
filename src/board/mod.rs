@@ -46,6 +46,7 @@ pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
     std::num::Wrapping(sq8x8 + (sq8x8 & 0xF8))
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub enum ThreatInfo {
     Safe,
     Single { c: Coord0x88 },
@@ -80,7 +81,7 @@ pub struct Unmove {
     pub to: Coord0x88,
     pub captured: Piece,
     pub promoted: bool,
-
+    pub in_check: Option<ThreatInfo>,
 }
 
 
@@ -93,6 +94,7 @@ pub struct Board {
     pub en_passant: Option<Coord0x88>,
     pub revmov_clock: usize,
     pub king_pos: [Coord0x88; 2],
+    pub in_check: Option<ThreatInfo>,
 }
 
 impl Board {
@@ -122,6 +124,8 @@ impl Board {
             en_passant: None,
 
             king_pos: [c0x88::e1, c0x88::e8],
+
+            in_check: None,
         }
     }
 
@@ -142,7 +146,7 @@ impl Board {
             self[cmove.to] = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
             self[cmove.from] = pieces::NONE;
             promoted = true;
-            
+
         } else {
             self[cmove.to] = self[cmove.from];
             self[cmove.from] = pieces::NONE;
@@ -151,15 +155,20 @@ impl Board {
 
         //Time to do the move
         // First add the information to undo the move to the stack
+
+        // Vague but optimized way: self.in_check = None and in_check = self.in_check which will be pushed on the stack.
+        let in_check = std::mem::replace(&mut self.in_check, None);
+
+        // Now actually push
         self.unmake_stack.push( Unmove{
             from: cmove.from,
             to: cmove.to,
             captured: captured,
             promoted: promoted,
+            in_check: in_check,
         });
 
-
-
+        // Update 'trivial' fields
         self.side_to_move = !self.side_to_move;
         self.revmov_clock += 1;
     }
@@ -173,6 +182,7 @@ impl Board {
             self[u.from] = self[u.to];
         }
         self[u.to] = u.captured;
+        self.in_check = u.in_check;
     }
 
 
@@ -260,7 +270,10 @@ impl Board {
     }
 
     pub fn is_check(&self, side: Side) -> ThreatInfo {
-        self.under_attack(self.king_pos[side as usize], side)
+        match &self.in_check {
+            None => { self.under_attack(self.king_pos[side as usize], side) }
+            Some(x) => x.clone()
+        }
     }
 }
 impl std::ops::Index<Coord0x88> for Board {
