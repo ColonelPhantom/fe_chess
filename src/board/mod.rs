@@ -87,6 +87,7 @@ pub struct Unmove {
     pub promoted: bool,
     pub revmov_clock: usize,
     pub in_check: Option<ThreatInfo>,
+    pub en_passant: EnPassantState,
 }
 
 
@@ -139,6 +140,25 @@ impl Board {
         let captured: Piece = self[cmove.to];
         let promoted;
         let revmov_clock = self.revmov_clock;
+        let mut undo_ep = EnPassantState::None;
+
+        if self.en_passant.is_some() {
+            undo_ep = EnPassantState::Possible(self.en_passant.unwrap());
+        }
+
+        match cmove.en_passant {
+            EnPassantState::None => {
+                self.en_passant = None;
+            }
+            EnPassantState::Possible(c) => {
+                self.en_passant = Some(c);
+            }
+            EnPassantState::Capture(c) => {
+                self[c] = pieces::NONE;
+                undo_ep = EnPassantState::Capture(c);
+            }
+        }
+
 
         // Reversible move clock
         if self.occupied(cmove.to) || self[cmove.from].piece_type == PieceType::Pawn {
@@ -182,6 +202,7 @@ impl Board {
             promoted: promoted,
             in_check: in_check,
             revmov_clock: revmov_clock,
+            en_passant: undo_ep,
         });
 
         // Update 'trivial' field(s)
@@ -199,6 +220,18 @@ impl Board {
         self[u.to] = u.captured;
         self.in_check = u.in_check;
         self.revmov_clock = u.revmov_clock;
+
+        match u.en_passant {
+            EnPassantState::None => {
+                self.en_passant = None;
+            }
+            EnPassantState::Possible(c) => {
+                self.en_passant = Some(c);
+            }
+            EnPassantState::Capture(c) => {
+                self[c] = Piece{piece_type: PieceType::Pawn, color: !self.side_to_move};
+            }
+        }
 
         if self[u.from].piece_type == PieceType::King {
             self.king_pos[self.side_to_move as usize] = u.from;
