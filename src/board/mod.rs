@@ -267,13 +267,22 @@ impl Board {
            ($offset:expr, $types:pat) => 
            {
                 let mut to = c+$offset;
-                if self[to].piece_type == PieceType::King && self[to].color != side {
+                if to.0 & 0x88 == 0 && self[to].piece_type == PieceType::King && self[to].color != side {
                     threats.push(to);
                 } else {
-                    while to.0 & 0x88 == 0 && !self.occupied(to) {
+                    while to.0 & 0x88 == 0 {
+                        if self.occupied(to) {
+                            if self[to].color != side {
+                                match self[to].piece_type {
+                                    $types | PieceType::Queen => { threats.push(to) }
+                                    _ => {}
+                                }
+                            }
+                            break;
+                        }
                         to += $offset;
                     }
-                    if self[to].color != side {
+                    if to.0 & 0x88 == 0 && self[to].color != side {
                         match self[to].piece_type {
                             $types | PieceType::Queen => { threats.push(to) }
                             _ => {}
