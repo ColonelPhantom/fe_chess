@@ -81,6 +81,7 @@ pub struct Unmove {
     pub to: Coord0x88,
     pub captured: Piece,
     pub promoted: bool,
+    pub revmov_clock: usize,
     pub in_check: Option<ThreatInfo>,
 }
 
@@ -133,6 +134,14 @@ impl Board {
         // Begin with determining info on the move
         let captured: Piece = self[cmove.to];
         let promoted;
+        let revmov_clock = self.revmov_clock;
+
+        // Reversible move clock
+        if self.occupied(cmove.to) || self[cmove.from].piece_type == PieceType::Pawn {
+            self.revmov_clock += 1;
+        } else {
+            self.revmov_clock = 0;
+        }
 
         if self[cmove.from].piece_type == PieceType::King {
             // TODO: remove castling rights
@@ -141,24 +150,26 @@ impl Board {
             self.king_pos[self.side_to_move as usize] = cmove.to;
         }
 
+        // TODO: remove castling rights when rook moves from starting square
+
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
             self[cmove.to] = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
             self[cmove.from] = pieces::NONE;
             promoted = true;
 
-        } else {
+        } else { // Non-promoting move: business as usual
             self[cmove.to] = self[cmove.from];
             self[cmove.from] = pieces::NONE;
             promoted = false;
         }
 
-        //Time to do the move
-        // First add the information to undo the move to the stack
+        // Add the information to undo the move to the stack
 
-        // Vague but optimized way: self.in_check = None and in_check = self.in_check which will be pushed on the stack.
+        // Vague but optimized code equivalent to but doesn't conflict with the borrow checker:
+        //let in_check = self.in_check
+        //self.in_check = None
         let in_check = std::mem::replace(&mut self.in_check, None);
-
         // Now actually push
         self.unmake_stack.push( Unmove{
             from: cmove.from,
@@ -166,15 +177,15 @@ impl Board {
             captured: captured,
             promoted: promoted,
             in_check: in_check,
+            revmov_clock: revmov_clock,
         });
 
-        // Update 'trivial' fields
+        // Update 'trivial' field(s)
         self.side_to_move = !self.side_to_move;
-        self.revmov_clock += 1;
     }
     
     pub fn unmake(&mut self) {
-        self.side_to_move = !self.side_to_move;
+        self.side_to_move = !self.side_to_move; // At start of function so it's the side that made the move.
         let u = self.unmake_stack.pop().unwrap();
         if u.promoted {
             self[u.from] = Piece{piece_type: PieceType::Pawn, color: self.side_to_move};
@@ -183,6 +194,11 @@ impl Board {
         }
         self[u.to] = u.captured;
         self.in_check = u.in_check;
+        self.revmov_clock = u.revmov_clock;
+
+        if self[u.from].piece_type == PieceType::King {
+            self.king_pos[self.side_to_move as usize] = u.from;
+        }
     }
 
 
