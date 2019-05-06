@@ -315,14 +315,21 @@ impl Board {
         slide_threat!(o0x88( 0,  1), PieceType::Rook);
         slide_threat!(o0x88( 0, -1), PieceType::Rook);
 
-
-        return ThreatInfo::Safe;
+        match threats.len() {
+            0 => ThreatInfo::Safe,
+            1 => ThreatInfo::Single{ c: threats[0] },
+            _ => ThreatInfo::Multiple { c: threats },
+        }
 
     }
 
-    pub fn is_check(&self, side: Side) -> ThreatInfo {
+    pub fn is_check(&mut self, side: Side) -> ThreatInfo {
         match &self.in_check {
-            None => { self.under_attack(self.king_pos[side as usize], side) }
+            None => {
+                let c = self.under_attack(self.king_pos[side as usize], side);
+                self.in_check = Some(c.clone());
+                return c;
+            }
             Some(x) => x.clone()
         }
     }

@@ -16,7 +16,7 @@ fn perft(b: &mut board::Board, depth: usize) -> usize {
     let moves = movegen::movegen(b);
     for m in moves {
         b.make(&m);
-        let check = b.is_check(b.side_to_move);
+        let check = b.is_check(!b.side_to_move);
         if let board::ThreatInfo::Safe = check {
             perft_count += perft(b, depth - 1);
         }
@@ -37,7 +37,7 @@ fn pretty_perft(b: &mut board::Board, depth: usize) -> usize {
     let moves = movegen::movegen(b);
     for m in moves {
         b.make(&m);
-        let check = b.is_check(b.side_to_move);
+        let check = b.is_check(!b.side_to_move);
         if let board::ThreatInfo::Safe = check {
             let c = perft(b, depth - 1);
             perft_count += c;
