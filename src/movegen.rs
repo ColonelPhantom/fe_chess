@@ -72,7 +72,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 from: c,
                                 to: b.en_passant.unwrap(),
                                 promote_to: PieceType::None,
-                                en_passant: EnPassantState::Capture,
+                                en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
                             })
                         }
                         // Regular capture
@@ -112,7 +112,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 from: c,
                                 to: b.en_passant.unwrap(),
                                 promote_to: PieceType::None,
-                                en_passant: EnPassantState::Capture,
+                                en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
                             })
                         }
                     }

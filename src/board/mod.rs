@@ -59,7 +59,7 @@ pub enum ThreatInfo {
 pub enum EnPassantState {
     None,
     Possible ( Coord0x88 ),
-    Capture,
+    Capture ( Coord0x88 ),
 }
 
 #[derive(Debug)]
