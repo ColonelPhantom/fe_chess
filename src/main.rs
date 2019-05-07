@@ -87,15 +87,13 @@ fn main() {
 
     //println!("\n\n");
     println!("Perft test, depth 1: {}", perft(&mut b, 1));
-    b = board::Board::new();
     println!("Perft test, depth 2: {}", perft(&mut b, 2));
-    b = board::Board::new();
     println!("Perft test, depth 3: {}", perft(&mut b, 3));
-    b = board::Board::new();
     println!("Perft test, depth 4: {}", perft(&mut b, 4));
-    b = board::Board::new();
+    //b.make(&board::Move::new(board::c0x88::a2, board::c0x88::a4));
     println!("Perft test, depth 5: {}", pretty_perft(&mut b, 5));
-    b = board::Board::new();
+    print_board(&b);
+    
     println!("Perft test, depth 6: {}", perft(&mut b, 6));
 
 }
