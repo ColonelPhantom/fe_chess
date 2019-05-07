@@ -57,7 +57,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                     moves.push( Move {
                                         from: c, to: c+o0x88(0,2),
                                         promote_to: PieceType::None,
-                                        en_passant: EnPassantState::Possible( c+o0x88(0,1) ),
+                                        en_passant: EnPassantState::Possible( c+o0x88(0,2) ),
                                     });
                                 }
                             }
@@ -65,12 +65,12 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                         // En passant capture
                         if
                                 b.en_passant.is_some() &&
-                                (( b.en_passant.unwrap() - (c+o0x88(0, 1)) ).0 == 1 ||
-                                 ( (c+o0x88(0, 1)) - b.en_passant.unwrap() ).0 == 1 )
+                                (( b.en_passant.unwrap() - (c) ).0 == 1 ||
+                                 ( (c) - b.en_passant.unwrap() ).0 == 1 )
                         {
                             moves.push(Move {
                                 from: c,
-                                to: b.en_passant.unwrap(),
+                                to: b.en_passant.unwrap()+o0x88(0, 1),
                                 promote_to: PieceType::None,
                                 en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
                             })
@@ -105,11 +105,11 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                         // En passant capture
                         if
                                 b.en_passant.is_some() &&
-                                (( b.en_passant.unwrap() - (c+o0x88(0, -1)) ).0 == 1 ||
-                                 ( (c+o0x88(0, -1)) - b.en_passant.unwrap() ).0 == 1 )
+                                (( b.en_passant.unwrap() - (c) ).0 == 1 ||
+                                 ( (c) - b.en_passant.unwrap() ).0 == 1 )
                         {
                             moves.push(Move {
-                                from: c,
+                                from: c + o0x88(0, -1),
                                 to: b.en_passant.unwrap(),
                                 promote_to: PieceType::None,
                                 en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
