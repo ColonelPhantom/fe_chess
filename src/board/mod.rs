@@ -71,6 +71,7 @@ pub struct Move {
     pub to: Coord0x88,
     pub promote_to: PieceType,
     pub en_passant: EnPassantState,
+    pub castling: Option<usize>,
 }
 impl Move {
     pub fn new(from: Coord0x88, to: Coord0x88) -> Move {
@@ -79,6 +80,7 @@ impl Move {
             to: to,
             promote_to: PieceType::None,
             en_passant: EnPassantState::None,
+            castling: None,
         }
     }
 }
