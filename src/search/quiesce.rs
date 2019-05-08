@@ -5,9 +5,13 @@ use board::Board;
 
 
 pub fn quiesce(b: &mut Board, mut alpha: isize, beta:isize ) -> isize {
-    return eval(b);
+    let sign = match b.side_to_move {
+        board::WHITE => 1,
+        board::BLACK => -1,
+    };
+    return sign * eval(b);
     
-    let e = eval(b);
+    let e = sign * eval(b);
     if e >= beta  {
         return beta;
     }
