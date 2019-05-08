@@ -260,6 +260,7 @@ impl Board {
         self[u.to] = u.captured;
         self.in_check = u.in_check;
         self.revmov_clock = u.revmov_clock;
+        self.castling = u.castling_rights;
 
         match u.en_passant {
             EnPassantState::None => {
@@ -276,6 +277,23 @@ impl Board {
 
         if self[u.from].piece_type == PieceType::King {
             self.king_pos[self.side_to_move as usize] = u.from;
+        }
+
+        if u.castling.is_some() {
+            // Kingpos is already updated to what it was before move in the above if{}
+            let kc = self.king_pos[self.side_to_move as usize];
+
+            match u.castling.unwrap() {
+                CR_KING => {
+                    self[kc + o0x88(3, 0)] = self[kc + o0x88(1, 0)];
+                    self[kc + o0x88(1, 0)] = pieces::NONE;
+                }
+                CR_QUEEN => {
+                    self[kc + o0x88(-4, 0)] = self[kc + o0x88(-1, 0)];
+                    self[kc + o0x88(-1, 0)] = pieces::NONE;
+                }
+                _ => panic!("Uncastling not with value CR_KING or CR_QUEEN")
+            }
         }
     }
 
