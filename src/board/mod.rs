@@ -93,6 +93,8 @@ pub struct Unmove {
     pub revmov_clock: usize,
     pub in_check: Option<ThreatInfo>,
     pub en_passant: EnPassantState,
+    pub castling: Option<usize>,
+    pub castling_rights: CastlingRights,
 }
 
 
@@ -149,6 +151,33 @@ impl Board {
         let promoted;
         let revmov_clock = self.revmov_clock;
         let mut undo_ep = EnPassantState::None;
+        let undo_castlerights = self.castling;
+        let undo_castling;
+
+        if let Some(c) = cmove.castling {
+            undo_castling = Some(c);
+
+            // Only handle rook movement and castling rights
+            // King movement is handled by regular code
+            let kc = self.king_pos[self.side_to_move as usize];
+            match c {
+                CR_KING => {
+                    self[kc + o0x88(1, 0)] = self[kc + o0x88(3, 0)];
+                    self[kc + o0x88(3, 0)] = pieces::NONE;
+
+                    self.castling[CR_KING + self.side_to_move as usize] = false;
+                }
+                CR_QUEEN => {
+                    self[kc + o0x88(-1, 0)] = self[kc + o0x88(-4, 0)];
+                    self[kc + o0x88(-4, 0)] = pieces::NONE;
+
+                    self.castling[CR_QUEEN + self.side_to_move as usize] = false;
+                }
+                _ => panic!("Castling not with value CR_KING or CR_QUEEN")
+            }
+        } else {
+            undo_castling = None;
+        }
 
         if self.en_passant.is_some() {
             undo_ep = EnPassantState::Possible(self.en_passant.unwrap());
@@ -212,6 +241,8 @@ impl Board {
             in_check: in_check,
             revmov_clock: revmov_clock,
             en_passant: undo_ep,
+            castling: undo_castling,
+            castling_rights: undo_castlerights,
         });
 
         // Update 'trivial' field(s)
