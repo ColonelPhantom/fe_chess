@@ -53,7 +53,10 @@ pub enum ThreatInfo {
     Multiple { c: Vec<Coord0x88> },
 }
 
-
+pub type CastlingRights = [bool; 4];
+pub const CR_QUEEN: usize = 2;
+pub const CR_KING: usize = 0;
+// CastlingRights[CR_{QUEEN|KING} + side_to_move as usize]
 
 #[derive(Debug)]
 pub enum EnPassantState {
@@ -68,6 +71,7 @@ pub struct Move {
     pub to: Coord0x88,
     pub promote_to: PieceType,
     pub en_passant: EnPassantState,
+    pub castling: Option<usize>,
 }
 impl Move {
     pub fn new(from: Coord0x88, to: Coord0x88) -> Move {
@@ -76,6 +80,7 @@ impl Move {
             to: to,
             promote_to: PieceType::None,
             en_passant: EnPassantState::None,
+            castling: None,
         }
     }
 }
@@ -88,6 +93,8 @@ pub struct Unmove {
     pub revmov_clock: usize,
     pub in_check: Option<ThreatInfo>,
     pub en_passant: EnPassantState,
+    pub castling: Option<usize>,
+    pub castling_rights: CastlingRights,
 }
 
 
@@ -101,6 +108,7 @@ pub struct Board {
     pub revmov_clock: usize,
     pub king_pos: [Coord0x88; 2],
     pub in_check: Option<ThreatInfo>,
+    pub castling: CastlingRights,
 }
 
 impl Board {
@@ -132,6 +140,8 @@ impl Board {
             king_pos: [c0x88::e1, c0x88::e8],
 
             in_check: None,
+
+            castling: [true, true, true, true],
         }
     }
 
@@ -141,6 +151,33 @@ impl Board {
         let promoted;
         let revmov_clock = self.revmov_clock;
         let mut undo_ep = EnPassantState::None;
+        let undo_castlerights = self.castling;
+        let undo_castling;
+
+        if let Some(c) = cmove.castling {
+            undo_castling = Some(c);
+
+            // Only handle rook movement and castling rights
+            // King movement is handled by regular code
+            let kc = self.king_pos[self.side_to_move as usize];
+            match c {
+                CR_KING => {
+                    self[kc + o0x88(1, 0)] = self[kc + o0x88(3, 0)];
+                    self[kc + o0x88(3, 0)] = pieces::NONE;
+
+                    self.castling[CR_KING + self.side_to_move as usize] = false;
+                }
+                CR_QUEEN => {
+                    self[kc + o0x88(-1, 0)] = self[kc + o0x88(-4, 0)];
+                    self[kc + o0x88(-4, 0)] = pieces::NONE;
+
+                    self.castling[CR_QUEEN + self.side_to_move as usize] = false;
+                }
+                _ => panic!("Castling not with value CR_KING or CR_QUEEN")
+            }
+        } else {
+            undo_castling = None;
+        }
 
         if self.en_passant.is_some() {
             undo_ep = EnPassantState::Possible(self.en_passant.unwrap());
@@ -169,13 +206,23 @@ impl Board {
         }
 
         if self[cmove.from].piece_type == PieceType::King {
-            // TODO: remove castling rights
+            self.castling[CR_KING + self.side_to_move as usize] = false;
+            self.castling[CR_QUEEN + self.side_to_move as usize] = false;
 
             // Update kingpos
             self.king_pos[self.side_to_move as usize] = cmove.to;
         }
 
-        // TODO: remove castling rights when rook moves from starting square
+        if self[cmove.from].piece_type == PieceType::Rook {
+            match cmove.from {
+                c0x88::a1 => self.castling[CR_QUEEN + WHITE as usize] = false,
+                c0x88::h1 => self.castling[CR_KING + WHITE as usize] = false,
+                c0x88::a8 => self.castling[CR_QUEEN + BLACK as usize] = false,
+                c0x88::h8 => self.castling[CR_KING + BLACK as usize] = false,
+                _ => {}
+
+            }
+        }
 
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
@@ -204,6 +251,8 @@ impl Board {
             in_check: in_check,
             revmov_clock: revmov_clock,
             en_passant: undo_ep,
+            castling: undo_castling,
+            castling_rights: undo_castlerights,
         });
 
         // Update 'trivial' field(s)
@@ -221,6 +270,7 @@ impl Board {
         self[u.to] = u.captured;
         self.in_check = u.in_check;
         self.revmov_clock = u.revmov_clock;
+        self.castling = u.castling_rights;
 
         match u.en_passant {
             EnPassantState::None => {
@@ -237,6 +287,23 @@ impl Board {
 
         if self[u.from].piece_type == PieceType::King {
             self.king_pos[self.side_to_move as usize] = u.from;
+        }
+
+        if u.castling.is_some() {
+            // Kingpos is already updated to what it was before move in the above if{}
+            let kc = self.king_pos[self.side_to_move as usize];
+
+            match u.castling.unwrap() {
+                CR_KING => {
+                    self[kc + o0x88(3, 0)] = self[kc + o0x88(1, 0)];
+                    self[kc + o0x88(1, 0)] = pieces::NONE;
+                }
+                CR_QUEEN => {
+                    self[kc + o0x88(-4, 0)] = self[kc + o0x88(-1, 0)];
+                    self[kc + o0x88(-1, 0)] = pieces::NONE;
+                }
+                _ => panic!("Uncastling not with value CR_KING or CR_QUEEN")
+            }
         }
     }
 
@@ -329,7 +396,9 @@ impl Board {
         match &self.in_check {
             None => {
                 let c = self.under_attack(self.king_pos[side as usize], side);
-                self.in_check = Some(c.clone());
+                if side == self.side_to_move {
+                    self.in_check = Some(c.clone());
+                }
                 return c;
             }
             Some(x) => x.clone()

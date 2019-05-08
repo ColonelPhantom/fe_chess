@@ -1,7 +1,7 @@
 use crate::board;
 use board::*;
 
-pub fn movegen(b: &Board) -> Vec<Move> {
+pub fn movegen(b: &mut Board) -> Vec<Move> {
     let mut moves: Vec<Move> = Vec::with_capacity(218);
     for rank in 0..8 { for file in 0..8 { 
         let c: Coord0x88 = c0x88(file,rank);
@@ -38,10 +38,10 @@ pub fn movegen(b: &Board) -> Vec<Move> {
             PieceType::Pawn => {
                 macro_rules! gen_promotions {
                     ($from:expr, $to:expr) => {
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Knight, en_passant: EnPassantState::None});
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Bishop, en_passant: EnPassantState::None});
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Rook, en_passant: EnPassantState::None});
-                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Queen, en_passant: EnPassantState::None});                        
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Knight, en_passant: EnPassantState::None, castling: None});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Bishop, en_passant: EnPassantState::None, castling: None});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Rook, en_passant: EnPassantState::None, castling: None});
+                        moves.push(Move{from: $from, to:$to, promote_to: PieceType::Queen, en_passant: EnPassantState::None, castling: None});
                     };
                 }
                 match p.color {
@@ -58,6 +58,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                         from: c, to: c+o0x88(0,2),
                                         promote_to: PieceType::None,
                                         en_passant: EnPassantState::Possible( c+o0x88(0,2) ),
+                                        castling: None,
                                     });
                                 }
                             }
@@ -73,6 +74,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 to: b.en_passant.unwrap()+o0x88(0, 1),
                                 promote_to: PieceType::None,
                                 en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
+                                castling: None,
                             })
                         }
                         // Regular capture
@@ -106,6 +108,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                         from: c, to: c+o0x88(0,-2),
                                         promote_to: PieceType::None,
                                         en_passant: EnPassantState::Possible( c+o0x88(0,-2) ),
+                                        castling: None,
                                     });
                                 }
                             }
@@ -121,6 +124,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                 to: b.en_passant.unwrap()+o0x88(0, -1),
                                 promote_to: PieceType::None,
                                 en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
+                                castling: None,
                             })
                         }
                         // Regular capture
@@ -185,6 +189,45 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                 nonslide_move!(c+o0x88(-1,  0));
                 nonslide_move!(c+o0x88( 0,  1));
                 nonslide_move!(c+o0x88( 0, -1));
+
+                // Castling
+                let kc = b.king_pos[b.side_to_move as usize];
+                if 
+                        b.castling[CR_KING + b.side_to_move as usize] &&
+                        !b.occupied(kc + o0x88(1, 0)) &&
+                        !b.occupied(kc + o0x88(2, 0)) &&
+                        b.is_check(b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(1, 0), b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(2, 0), b.side_to_move) == ThreatInfo::Safe
+                {
+                    moves.push( Move {
+                        from: c,
+                        to: c + o0x88(2, 0),
+                        promote_to: PieceType::None,
+                        en_passant: EnPassantState::None,
+                        castling: Some(CR_KING),
+                    });
+                }
+
+                if 
+                        b.castling[CR_QUEEN + b.side_to_move as usize] &&
+                        !b.occupied(kc + o0x88(-1, 0)) &&
+                        !b.occupied(kc + o0x88(-2, 0)) &&
+                        !b.occupied(kc + o0x88(-3, 0)) &&
+                        b.is_check(b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(-1, 0), b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(-2, 0), b.side_to_move) == ThreatInfo::Safe
+                {
+                    moves.push( Move {
+                        from: c,
+                        to: c + o0x88(-2, 0),
+                        promote_to: PieceType::None,
+                        en_passant: EnPassantState::None,
+                        castling: Some(CR_QUEEN),
+                    });
+                }
+
+
             }
         }
     }}
