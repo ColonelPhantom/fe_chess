@@ -33,6 +33,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize
       if score > alpha  {
           alpha = score;
           pv = si.pv;
+          pv.push(m);
       }
    }
    return SearchInfo {
