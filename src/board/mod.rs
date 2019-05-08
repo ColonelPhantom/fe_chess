@@ -52,6 +52,15 @@ pub enum ThreatInfo {
     Single { c: Coord0x88 },
     Multiple { c: Vec<Coord0x88> },
 }
+impl ThreatInfo {
+    pub fn is_safe(&self) -> bool {
+        match self {
+            ThreatInfo::Safe => true,
+            ThreatInfo::Single{c: _} => false,
+            ThreatInfo::Multiple{c: _} => false,
+        }
+    }
+}
 
 pub type CastlingRights = [bool; 4];
 pub const CR_QUEEN: usize = 2;
