@@ -156,6 +156,7 @@ impl Board {
             EnPassantState::Capture(c) => {
                 self[c] = pieces::NONE;
                 undo_ep = EnPassantState::Capture(c);
+                self.en_passant = None;
             }
         }
 

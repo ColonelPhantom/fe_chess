@@ -93,6 +93,23 @@ fn main() {
     //b.make(&board::Move::new(board::c0x88::a2, board::c0x88::a4));
     println!("Perft test, depth 5: {}", perft(&mut b, 5));
     //print_board(&b);
+    /*b.make(&board::Move::new(board::c0x88::a2, board::c0x88::a4));
+    b.make(&board::Move::new(board::c0x88::c7, board::c0x88::c5));
+    b.make(&board::Move::new(board::c0x88::a4, board::c0x88::a5));
+    b.make(&board::Move{
+        from: board::c0x88::b7,
+        to: board::c0x88::b5,
+        en_passant: board::EnPassantState::Possible(board::c0x88::b5),
+        promote_to: board::PieceType::None,
+    });
+    b.make(&board::Move{
+        from: board::c0x88::a5,
+        to: board::c0x88::b6,
+        en_passant: board::EnPassantState::Capture(board::c0x88::b5),
+        promote_to: board::PieceType::None,
+    });
+    print_board(&b);*/
     println!("Perft test, depth 6: {}", perft(&mut b, 6));
-
+    println!("Perft test, depth 7: {}", pretty_perft(&mut b, 7));
+    print_board(&b);
 }
