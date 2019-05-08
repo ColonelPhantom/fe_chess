@@ -53,7 +53,10 @@ pub enum ThreatInfo {
     Multiple { c: Vec<Coord0x88> },
 }
 
-
+pub type CastlingRights = [bool; 4];
+pub const CR_QUEEN: usize = 2;
+pub const CR_KING: usize = 0;
+// CastlingRights[CR_{QUEEN|KING} + side_to_move as usize]
 
 #[derive(Debug)]
 pub enum EnPassantState {
@@ -101,6 +104,7 @@ pub struct Board {
     pub revmov_clock: usize,
     pub king_pos: [Coord0x88; 2],
     pub in_check: Option<ThreatInfo>,
+    pub castling: CastlingRights,
 }
 
 impl Board {
@@ -132,6 +136,8 @@ impl Board {
             king_pos: [c0x88::e1, c0x88::e8],
 
             in_check: None,
+
+            castling: [true, true, true, true],
         }
     }
 
