@@ -97,5 +97,9 @@ fn main() {
     // println!("Perft test, depth 7: {}", pretty_perft(&mut b, 7));
     // print_board(&b);
 
-    println!("{:?}", search::search(&mut b, 6));
-}
+    let mut searchinfo = search::search(&mut b, 7);
+    while let Some(m) = searchinfo.pv.pop() {
+        println!("{:02x} {:02x} {:?} {:?} {:?}", m.from, m.to, m.promote_to, m.en_passant, m.castling);
+    }
+    println!("Score: {}", searchinfo.score);
+    }
