@@ -91,9 +91,8 @@ fn main() {
     println!("Perft test, depth 3: {}", perft(&mut b, 3));
     println!("Perft test, depth 4: {}", perft(&mut b, 4));
     //b.make(&board::Move::new(board::c0x88::a2, board::c0x88::a4));
-    println!("Perft test, depth 5: {}", pretty_perft(&mut b, 5));
-    print_board(&b);
-    
+    println!("Perft test, depth 5: {}", perft(&mut b, 5));
+    //print_board(&b);
     println!("Perft test, depth 6: {}", perft(&mut b, 6));
 
 }

@@ -77,12 +77,20 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                         }
                         // Regular capture
                         let lcap_c = c+o0x88(-1, 1);
-                        if b.occupied(lcap_c) && b[lcap_c].color != p.color {
-                            moves.push(Move::new(c, lcap_c));
+                        if lcap_c.0 & 0x88 == 0 && b.occupied(lcap_c) && b[lcap_c].color != p.color {
+                            if rank == 6 {  // 6 is second last
+                                gen_promotions!(c, lcap_c);
+                            } else {
+                                moves.push(Move::new(c, lcap_c));
+                            }
                         }
                         let rcap_c = c+o0x88( 1, 1);
-                        if b.occupied(rcap_c) && b[rcap_c].color != p.color {
-                            moves.push(Move::new(c, rcap_c));
+                        if rcap_c.0 & 0x88 == 0 && b.occupied(rcap_c) && b[rcap_c].color != p.color {
+                            if rank == 6 {  // 6 is second last
+                                gen_promotions!(c, rcap_c);
+                            } else {
+                                moves.push(Move::new(c, rcap_c));
+                            }
                         }
                     },
                     BLACK => {
@@ -97,7 +105,7 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                     moves.push( Move {
                                         from: c, to: c+o0x88(0,-2),
                                         promote_to: PieceType::None,
-                                        en_passant: EnPassantState::Possible( c+o0x88(0,-1) ),
+                                        en_passant: EnPassantState::Possible( c+o0x88(0,-2) ),
                                     });
                                 }
                             }
@@ -109,20 +117,28 @@ pub fn movegen(b: &Board) -> Vec<Move> {
                                  ( (c) - b.en_passant.unwrap() ).0 == 1 )
                         {
                             moves.push(Move {
-                                from: c + o0x88(0, -1),
-                                to: b.en_passant.unwrap(),
+                                from: c,
+                                to: b.en_passant.unwrap()+o0x88(0, -1),
                                 promote_to: PieceType::None,
                                 en_passant: EnPassantState::Capture(b.en_passant.unwrap()),
                             })
                         }
                         // Regular capture
                         let lcap_c = c+o0x88(-1, -1);
-                        if b.occupied(lcap_c) && b[lcap_c].color != p.color {
-                            moves.push(Move::new(c, lcap_c));
+                        if lcap_c.0 & 0x88 == 0 && b.occupied(lcap_c) && b[lcap_c].color != p.color {
+                            if rank == 7-6 {  // 6 is second last
+                                gen_promotions!(c, lcap_c);
+                            } else {
+                                moves.push(Move::new(c, lcap_c));
+                            }
                         }
                         let rcap_c = c+o0x88( 1, -1);
-                        if b.occupied(rcap_c) && b[rcap_c].color != p.color {
-                            moves.push(Move::new(c, rcap_c));
+                        if rcap_c.0 & 0x88 == 0 && b.occupied(rcap_c) && b[rcap_c].color != p.color {
+                            if rank == 7-6 {  // 6 is second last
+                                gen_promotions!(c, rcap_c);
+                            } else {
+                                moves.push(Move::new(c, rcap_c));
+                            }
                         }
                     }
                 }
