@@ -206,13 +206,23 @@ impl Board {
         }
 
         if self[cmove.from].piece_type == PieceType::King {
-            // TODO: remove castling rights
+            self.castling[CR_KING + self.side_to_move as usize] = false;
+            self.castling[CR_QUEEN + self.side_to_move as usize] = false;
 
             // Update kingpos
             self.king_pos[self.side_to_move as usize] = cmove.to;
         }
 
-        // TODO: remove castling rights when rook moves from starting square
+        if self[cmove.from].piece_type == PieceType::Rook {
+            match cmove.from {
+                c0x88::a1 => self.castling[CR_QUEEN + WHITE as usize] = false,
+                c0x88::h1 => self.castling[CR_KING + WHITE as usize] = false,
+                c0x88::a8 => self.castling[CR_QUEEN + BLACK as usize] = false,
+                c0x88::h8 => self.castling[CR_KING + BLACK as usize] = false,
+                _ => {}
+
+            }
+        }
 
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
