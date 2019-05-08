@@ -396,7 +396,9 @@ impl Board {
         match &self.in_check {
             None => {
                 let c = self.under_attack(self.king_pos[side as usize], side);
-                self.in_check = Some(c.clone());
+                if side == self.side_to_move {
+                    self.in_check = Some(c.clone());
+                }
                 return c;
             }
             Some(x) => x.clone()
