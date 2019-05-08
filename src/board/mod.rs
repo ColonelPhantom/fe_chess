@@ -230,6 +230,7 @@ impl Board {
             }
             EnPassantState::Capture(c) => {
                 self[c] = Piece{piece_type: PieceType::Pawn, color: !self.side_to_move};
+                self.en_passant = Some(c);
             }
         }
 
