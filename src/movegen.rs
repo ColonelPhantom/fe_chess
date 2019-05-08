@@ -191,13 +191,14 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
                 nonslide_move!(c+o0x88( 0, -1));
 
                 // Castling
+                let kc = b.king_pos[b.side_to_move as usize];
                 if 
                         b.castling[CR_KING + b.side_to_move as usize] &&
-                        !b.occupied(b.king_pos[b.side_to_move as usize] + o0x88(1, 0)) &&
-                        !b.occupied(b.king_pos[b.side_to_move as usize] + o0x88(2, 0)) &&
+                        !b.occupied(kc + o0x88(1, 0)) &&
+                        !b.occupied(kc + o0x88(2, 0)) &&
                         b.is_check(b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(b.king_pos[b.side_to_move as usize] + o0x88(1, 0), b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(b.king_pos[b.side_to_move as usize] + o0x88(2, 0), b.side_to_move) == ThreatInfo::Safe
+                        b.under_attack(kc + o0x88(1, 0), b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(2, 0), b.side_to_move) == ThreatInfo::Safe
                 {
                     moves.push( Move {
                         from: c,
@@ -210,19 +211,19 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
 
                 if 
                         b.castling[CR_QUEEN + b.side_to_move as usize] &&
-                        !b.occupied(b.king_pos[b.side_to_move as usize] + o0x88(-1, 0)) &&
-                        !b.occupied(b.king_pos[b.side_to_move as usize] + o0x88(-2, 0)) &&
-                        !b.occupied(b.king_pos[b.side_to_move as usize] + o0x88(-3, 0)) &&
+                        !b.occupied(kc + o0x88(-1, 0)) &&
+                        !b.occupied(kc + o0x88(-2, 0)) &&
+                        !b.occupied(kc + o0x88(-3, 0)) &&
                         b.is_check(b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(b.king_pos[b.side_to_move as usize] + o0x88(1, 0), b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(b.king_pos[b.side_to_move as usize] + o0x88(2, 0), b.side_to_move) == ThreatInfo::Safe
+                        b.under_attack(kc + o0x88(-1, 0), b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(-2, 0), b.side_to_move) == ThreatInfo::Safe
                 {
                     moves.push( Move {
                         from: c,
-                        to: c + o0x88(2, 0),
+                        to: c + o0x88(-2, 0),
                         promote_to: PieceType::None,
                         en_passant: EnPassantState::None,
-                        castling: Some(CR_KING),
+                        castling: Some(CR_QUEEN),
                     });
                 }
 
