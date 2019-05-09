@@ -21,7 +21,8 @@ pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize
 
    for m in moves {
       b.make(&m);
-      if b.is_check(!b.side_to_move).is_safe() {
+      if !b.is_check(!b.side_to_move).is_safe() {
+          b.unmake();
           continue;
       }
       let si = alpha_beta(b, -beta, -alpha, depthleft - 1 );

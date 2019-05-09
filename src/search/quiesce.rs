@@ -9,7 +9,6 @@ pub fn quiesce(b: &mut Board, mut alpha: isize, beta:isize ) -> isize {
         board::WHITE => 1,
         board::BLACK => -1,
     };
-    return sign * eval(b);
     
     let e = sign * eval(b);
     if e >= beta  {
@@ -19,15 +18,22 @@ pub fn quiesce(b: &mut Board, mut alpha: isize, beta:isize ) -> isize {
         alpha = e;
     }
 
-    /*until( every_capture_has_been_examined )  {
-        MakeCapture();
-        score = -Quiesce( -beta, -alpha );
-        TakeBackMove();
+    let cap_moves = movegen::capturegen::cap_gen(b);
+    for m in cap_moves {
+        b.make(&m);
+        if !b.is_check(!b.side_to_move).is_safe() {
+            b.unmake();
+            continue;
+        }
+        let score = -quiesce(b, -beta, -alpha );
+        b.unmake();
 
-        if( score >= beta )
+        if score >= beta  {
             return beta;
-        if( score > alpha )
+        }
+        if score > alpha  {
            alpha = score;
-    }*/
+        }
+    }
     return alpha;
 }
