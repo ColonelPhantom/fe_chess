@@ -1,7 +1,7 @@
 use crate::board;
 use board::*;
 
-mod capturegen;
+pub mod capturegen;
 
 pub fn movegen(b: &mut Board) -> Vec<Move> {
     let mut moves: Vec<Move> = Vec::with_capacity(218);

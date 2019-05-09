@@ -9,7 +9,7 @@ pub fn cap_gen(b: &Board) -> Vec<Move> {
         if p.color != b.side_to_move { continue; }   // Piece not of side to move: cannot move
 
         macro_rules! nonslide_move { ($to:expr) => {
-            if $to.0 & 0x88 == 0 && b.occupied($to) && b[$to].color != p.color ) {
+            if $to.0 & 0x88 == 0 && b.occupied($to) && b[$to].color != p.color {
                 moves.push(Move::new(c, $to));
             }
         };}
