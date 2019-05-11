@@ -8,7 +8,7 @@ math.randomseed(os.time());
 pieces = {"WPAWN", "WKNIGHT", "WBISHOP", "WROOK", "WQUEEN", "WKING", "BPAWN", "BKNIGHT", "BBISHOP", "BROOK", "BQUEEN", "BKING"}
 
 for i,p in pairs(pieces) do
-    io.write("pub const "..p.."[u64; 64] = [")
+    io.write("pub const "..p..": [u64; 64] = [")
     for i = 1,64 do
         io.write(r()..", ");
     end

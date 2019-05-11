@@ -2,7 +2,7 @@ use std::num::Wrapping;
 
 mod zobrist;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 //#[repr(u8)]
 pub enum PieceType {
     None = 0,
@@ -20,7 +20,7 @@ impl Default for PieceType {
 pub type Side = bool;
 pub const WHITE: Side = false;
 pub const BLACK: Side = true;
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Piece {
     pub piece_type: PieceType,
     pub color: Side
@@ -120,12 +120,13 @@ pub struct Board {
     pub king_pos: [Coord0x88; 2],
     pub in_check: Option<ThreatInfo>,
     pub castling: CastlingRights,
+    pub zobrist: u64
 }
 
 impl Board {
     pub fn new() -> Board {
         use pieces::*;
-        Board {
+        let mut b = Board {
             mailbox: [
                 WROOK,  WKNIGHT,    WBISHOP,    WQUEEN, WKING,  WBISHOP,    WKNIGHT,    WROOK,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
                 WPAWN,  WPAWN,      WPAWN,      WPAWN,  WPAWN,  WPAWN,      WPAWN,      WPAWN,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
@@ -137,23 +138,17 @@ impl Board {
                 BROOK,  BKNIGHT,    BBISHOP,    BQUEEN, BKING,  BBISHOP,    BKNIGHT,    BROOK,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
 
             ],
-
-            //bitboards: [0; 16],  // Use empty bitboards for now (yes that's gross)
-
             unmake_stack: Vec::new(),
-
             side_to_move: WHITE,
-
             revmov_clock: 0,
-
             en_passant: None,
-
             king_pos: [c0x88::e1, c0x88::e8],
-
             in_check: None,
-
             castling: [true, true, true, true],
-        }
+            zobrist: 0,
+        };
+        b.zobrist = b.zobrist_init();
+        return b;
     }
 
     pub fn make(&mut self, cmove: &Move) {
@@ -318,8 +313,6 @@ impl Board {
         }
     }
 
-
-
     // Helper functions
     pub fn occupied(&self, c: Coord0x88) -> bool {
         match self[c].piece_type {
@@ -414,6 +407,46 @@ impl Board {
             }
             Some(x) => x.clone()
         }
+    }
+
+    pub fn zobrist_init(&self) -> u64 {
+        let mut z: u64 = 0;
+        for file in 0..8 {
+            for rank in 0..8 {
+                use pieces::*;
+                let c = c0x88(file, rank);
+                z ^= match self[c] {
+                    NONE => 0,
+                    WPAWN => zobrist::WPAWN[coord0x88_to8x8(c)],
+                    WKNIGHT => zobrist::WKNIGHT[coord0x88_to8x8(c)],
+                    WBISHOP => zobrist::WBISHOP[coord0x88_to8x8(c)],
+                    WROOK => zobrist::WROOK[coord0x88_to8x8(c)],
+                    WQUEEN => zobrist::WQUEEN[coord0x88_to8x8(c)],
+                    WKING => zobrist::WKING[coord0x88_to8x8(c)],
+                    BPAWN => zobrist::BPAWN[coord0x88_to8x8(c)],
+                    BKNIGHT => zobrist::BKNIGHT[coord0x88_to8x8(c)],
+                    BBISHOP => zobrist::BBISHOP[coord0x88_to8x8(c)],
+                    BROOK => zobrist::BROOK[coord0x88_to8x8(c)],
+                    BQUEEN => zobrist::BQUEEN[coord0x88_to8x8(c)],
+                    BKING => zobrist::BKING[coord0x88_to8x8(c)],
+                    _ => 0,
+                }
+            }
+        }
+        z ^= match self.side_to_move {
+            WHITE => 0,
+            BLACK => zobrist::SIDE_TO_MOVE,
+        };
+        if self.en_passant.is_some() {
+            z ^= zobrist::ENPASSANT[self.en_passant.unwrap().0 & 7];
+        }
+        for cr in 0..4 {
+            if self.castling[cr] {
+                z ^= zobrist::CASTLING[cr];
+            }
+        }
+
+        return z;
     }
 }
 impl std::ops::Index<Coord0x88> for Board {
