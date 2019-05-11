@@ -207,6 +207,7 @@ pub struct Unmove {
     pub en_passant: EnPassantState,
     pub castling: Option<usize>,
     pub castling_rights: CastlingRights,
+    pub zobrist: u64,
 }
 
 
@@ -265,6 +266,7 @@ impl Board {
         let revmov_clock = self.revmov_clock;
         let mut undo_ep = EnPassantState::None;
         let undo_castlerights = self.castling;
+        let undo_zobrist = self.zobrist;
         let undo_castling;
 
         if let Some(c) = cmove.castling {
@@ -366,6 +368,7 @@ impl Board {
             en_passant: undo_ep,
             castling: undo_castling,
             castling_rights: undo_castlerights,
+            zobrist: undo_zobrist
         });
 
         // Update 'trivial' field(s)
@@ -384,6 +387,7 @@ impl Board {
         self.check_cache = u.check_cache;
         self.revmov_clock = u.revmov_clock;
         self.castling = u.castling_rights;
+        self.zobrist = u.zobrist;
 
         match u.en_passant {
             EnPassantState::None => {
