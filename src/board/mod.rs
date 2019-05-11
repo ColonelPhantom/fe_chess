@@ -1,5 +1,7 @@
 use std::num::Wrapping;
 
+mod zobrist;
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 //#[repr(u8)]
 pub enum PieceType {
