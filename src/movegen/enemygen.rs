@@ -1,15 +1,12 @@
 use crate::board;
 use board::*;
 
-pub mod capturegen;
-pub mod enemygen;
-
-pub fn movegen(b: &mut Board) -> Vec<Move> {
+pub fn enemygen(b: &mut Board) -> Vec<Move> {
     let mut moves: Vec<Move> = Vec::with_capacity(218);
     for rank in 0..8 { for file in 0..8 { 
         let c: Coord0x88 = c0x88(file,rank);
         let p: Piece = b[c];
-        if p.color != b.side_to_move { continue; }   // Piece not of side to move: cannot move
+        if p.color == b.side_to_move { continue; }   // Piece not of side to move: cannot move
 
         macro_rules! nonslide_move { ($to:expr) => {
             if $to.0 & 0x88 == 0 && (!b.occupied($to) || b[$to].color != p.color ) {
@@ -194,14 +191,14 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
                 nonslide_move!(c+o0x88( 0, -1));
 
                 // Castling
-                let kc = b.king_pos[b.side_to_move as usize];
+                let kc = b.king_pos[!b.side_to_move as usize];
                 if 
-                        b.castling[CR_KING + b.side_to_move as usize] &&
+                        b.castling[CR_KING + !b.side_to_move as usize] &&
                         !b.occupied(kc + o0x88(1, 0)) &&
                         !b.occupied(kc + o0x88(2, 0)) &&
-                        b.is_check(b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(1, 0), b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(2, 0), b.side_to_move) == ThreatInfo::Safe
+                        b.is_check(!b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(1, 0), !b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(2, 0), !b.side_to_move) == ThreatInfo::Safe
                 {
                     moves.push( Move {
                         from: c,
@@ -213,13 +210,13 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
                 }
 
                 if 
-                        b.castling[CR_QUEEN + b.side_to_move as usize] &&
+                        b.castling[CR_QUEEN + !b.side_to_move as usize] &&
                         !b.occupied(kc + o0x88(-1, 0)) &&
                         !b.occupied(kc + o0x88(-2, 0)) &&
                         !b.occupied(kc + o0x88(-3, 0)) &&
-                        b.is_check(b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(-1, 0), b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(-2, 0), b.side_to_move) == ThreatInfo::Safe
+                        b.is_check(!b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(-1, 0), !b.side_to_move) == ThreatInfo::Safe &&
+                        b.under_attack(kc + o0x88(-2, 0), !b.side_to_move) == ThreatInfo::Safe
                 {
                     moves.push( Move {
                         from: c,
