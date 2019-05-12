@@ -1,6 +1,7 @@
 pub mod uci;
 pub mod perft;
 pub mod interactive;
+pub mod test;
 
 use crate::*;
 
@@ -28,3 +29,4 @@ pub fn print_board(b: &board::Board) {
     }
     println!("Kingpos: {:02x}, {:02x}", b.king_pos[board::WHITE as usize], b.king_pos[board::BLACK as usize]);
 }
+
