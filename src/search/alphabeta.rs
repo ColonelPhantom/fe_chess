@@ -5,7 +5,7 @@ use board::Board;
 use super::quiesce::quiesce;
 use super::SearchInfo;
 
-pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize, prevPv: &mut Vec<board::Move>, )
+pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize, prev_pv: &mut Vec<board::Move>, )
  -> SearchInfo
 {
     let mut pv: Vec<board::Move> = vec![];
@@ -17,9 +17,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize
         };
     }
 
-    if let Some(m) = prevPv.pop() {
+    if let Some(m) = prev_pv.pop() {
         b.make(&m);
-        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prevPv);
+        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv);
         let score = -si.score;
         b.unmake();
         if score >= beta  {
@@ -43,7 +43,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize
             b.unmake();
             continue;
         }
-        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prevPv );
+        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv );
         let score = -si.score;
         b.unmake();
         if score >= beta  {
