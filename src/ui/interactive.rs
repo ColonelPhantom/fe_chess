@@ -26,8 +26,20 @@ pub fn main() {
     shell.new_command_noargs("perft", "Perform a perft() test", |_,_| { super::perft::main(); Ok(())});
     shell.new_command_noargs("test", "Runs a predetermined test routine", |_,_| { super::test::main(); Ok(())});
 
-    shell.new_command_noargs("print", "Prints the current board", |io,s| { super::print_board(&s.board); Ok(())});
-    shell.new_command_noargs("undo", "Undoes the most recent move", |io,s| { s.board.unmake(); Ok(())});
+    shell.new_command_noargs("print", "Prints the current board", |_,s| { super::print_board(&s.board); Ok(())});
+    shell.new_command_noargs("undo", "Undoes the most recent move", |_,s| { s.board.unmake(); Ok(())});
+
+    shell.new_command("do", "Perform a move (format: O-O, b1c3, e7e8q", 1, |io,s,a| {
+        // match board::Move::from_str(a, s.board) {
+        //     Some(m) => s.board.make(m),
+        //     Err(e) => Err(e),
+        // }
+        match board::Move::from_str(a[0], &s.board) {
+            Err(e) => writeln!(io, "Error parsing move! {:?}", e)?,
+            Ok(m) => { s.board.make(&m); },
+        };
+        return Ok(());
+    });
 
     shell.new_command_noargs("think", "Let the engine think about a move", |io,s| {
         s.thought = search::search(&mut s.board, s.depth).pv.pop();
