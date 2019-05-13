@@ -5,3 +5,4 @@ authors = ["Quinten Kock <quinten@quinten.space>"]
 edition = "2018"
 
 [dependencies]
+shrust = "0.0.6"
