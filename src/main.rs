@@ -8,7 +8,16 @@ mod ui;
 fn main() {
 
     let mut input = String::new();
-    std::io::stdin().read_line(&mut input).expect("io error");
+
+    let arg = std::env::args().nth(1);
+    if arg.is_none() {
+        print!("Enter a mode: ");
+        use std::io::prelude::*;
+        std::io::stdout().flush().expect("Couldn't flush stdout?!?");
+        std::io::stdin().read_line(&mut input).expect("io error");
+    } else {
+        input = arg.unwrap();
+    }
     match input.trim() {
         "uci" => return ui::uci::main(),
         "interactive" => return ui::interactive::main(),
