@@ -56,5 +56,10 @@ pub fn main() {
         s.thought = None;
         Ok(())
     });
+
+    shell.new_command_noargs("reset", "Put the board back in the starting position", |_,s| {
+        s.board = board::Board::new();
+        Ok(())
+    });
     shell.run_loop(&mut shrust::ShellIO::default());
 }
