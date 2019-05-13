@@ -16,18 +16,12 @@ pub fn main() {
     };
     let mut shell = shrust::Shell::new( s );
 
-
-    shell.new_command_noargs("hello", "Say 'hello' to the world", |io, _| {
-        writeln!(io, "Hello World !!!")?;
-        Ok(())
-    });
-
     shell.new_command_noargs("uci", "Continue as a UCI engine", |_,_| { super::uci::main(); Ok(()) });
     shell.new_command_noargs("perft", "Perform a perft() test", |_,_| { super::perft::main(); Ok(())});
     shell.new_command_noargs("test", "Runs a predetermined test routine", |_,_| { super::test::main(); Ok(())});
 
     shell.new_command_noargs("print", "Prints the current board", |_,s| { super::print_board(&s.board); Ok(())});
-    shell.new_command_noargs("undo", "Undoes the most recent move", |_,s| { s.board.unmake(); Ok(())});
+    shell.new_command_noargs("undo", "Undoes the most recent move", |_,s| { s.board.unmake(); s.thought = None; Ok(())});
 
     shell.new_command("do", "Perform a move (format: O-O, b1c3, e7e8q", 1, |io,s,a| {
         // match board::Move::from_str(a, s.board) {
@@ -60,6 +54,7 @@ pub fn main() {
 
     shell.new_command_noargs("reset", "Put the board back in the starting position", |_,s| {
         s.board = board::Board::new();
+        s.thought = None;
         Ok(())
     });
     shell.run_loop(&mut shrust::ShellIO::default());
