@@ -38,6 +38,7 @@ pub fn main() {
             Err(e) => writeln!(io, "Error parsing move! {:?}", e)?,
             Ok(m) => { s.board.make(&m); },
         };
+        s.thought = None;
         return Ok(());
     });
 
