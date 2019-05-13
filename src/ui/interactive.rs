@@ -26,10 +26,22 @@ pub fn main() {
     shell.new_command_noargs("perft", "Perform a perft() test", |_,_| { super::perft::main(); Ok(())});
     shell.new_command_noargs("test", "Runs a predetermined test routine", |_,_| { super::test::main(); Ok(())});
 
+    shell.new_command_noargs("print", "Prints the current board", |io,s| { super::print_board(&s.board); Ok(())});
+    shell.new_command_noargs("undo", "Undoes the most recent move", |io,s| { s.board.unmake(); Ok(())});
+
     shell.new_command_noargs("think", "Let the engine think about a move", |io,s| {
         s.thought = search::search(&mut s.board, s.depth).pv.pop();
         let m = s.thought.clone().expect("No move found!");
-        writeln!(io, "Move: {:?}", m)?;
+        writeln!(io, "Move: {}", m)?;
+        Ok(())
+    });
+
+    shell.new_command_noargs("ok", "Perform the suggested move", |io,s| {
+        match &s.thought {
+            None => writeln!(io, "No suggested move!")?,
+            Some(m) => s.board.make(&m)
+        };
+        s.thought = None;
         Ok(())
     });
     shell.run_loop(&mut shrust::ShellIO::default());
