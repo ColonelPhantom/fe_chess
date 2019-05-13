@@ -111,6 +111,14 @@ impl std::fmt::Display for Move {
         )
     }
 }
+impl std::str::FromStr for Move {
+    type Err = std::num::ParseIntError;
+
+    fn from_str(a: &str) -> Result<Self, Self::Err> {
+        let from = c0x88(0, 0);
+        Ok(Move::new(Wrapping(0), Wrapping(0)))
+    }
+}
 
 pub struct Unmove {
     pub from: Coord0x88,
