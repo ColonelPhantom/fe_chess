@@ -93,6 +93,24 @@ impl Move {
         }
     }
 }
+impl std::fmt::Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut s = String::from("");
+        write!(f, "{}{}{}{}{}",
+            std::char::from_u32('a' as u32 + (self.from.0 & 0x7) as u32).expect("Error trying to turn move into text"),
+            std::char::from_u32('1' as u32 + ((self.from.0 >> 4) & 0x7) as u32).expect("Error trying to turn move into text"),
+            std::char::from_u32('a' as u32 + (self.to.0 & 0x7) as u32).expect("Error trying to turn move into text"),
+            std::char::from_u32('1' as u32 + ((self.to.0 >> 4) & 0x7) as u32).expect("Error trying to turn move into text"),
+            match self.promote_to {
+                PieceType::Queen => 'q',
+                PieceType::Knight => 'n',
+                PieceType::Bishop => 'b',
+                PieceType::Rook => 'r',
+                _ => '\0',
+            }            
+        )
+    }
+}
 
 pub struct Unmove {
     pub from: Coord0x88,
