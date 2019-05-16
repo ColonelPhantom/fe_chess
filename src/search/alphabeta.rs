@@ -13,17 +13,22 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     if depthleft == 0 {
         if let ( Score::Value(p_alpha), Score::Value(p_beta) ) = (alpha, beta) {
-            return SearchInfo{
+        return SearchInfo{
                 score: Score::Value(quiesce(b, p_alpha, p_beta )),
-                pv: vec![],
-            };
-        }
+            pv: vec![],
+        };
+    }
     }
 
     if let Some(m) = prev_pv.pop() {
         b.make(&m);
         let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv);
-        let score = -si.score;
+        let score = match -si.score {
+            Score::Win(d) => Score::Win(d+1),
+            Score::Loss(d) => Score::Loss(d+1),
+            Score::Value(p) => Score::Value(p),
+            Score::Draw => Score::Draw,
+        };
         b.unmake();
         if score >= beta  {
             return SearchInfo {
@@ -44,12 +49,12 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         if !b.is_check(b.side_to_move).is_safe() {
             return SearchInfo {
                 score: Score::Loss(0),
-                pv
+                pv: vec![]
             }
         } else {
             return SearchInfo {
                 score: Score::Draw,
-                pv
+                pv: vec![]
             }
         }
     }
@@ -61,7 +66,12 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             continue;
         }
         let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv );
-        let score = -si.score;
+        let score = match -si.score {
+            Score::Win(d) => Score::Win(d+1),
+            Score::Loss(d) => Score::Loss(d+1),
+            Score::Value(p) => Score::Value(p),
+            Score::Draw => Score::Draw,
+        };
         b.unmake();
         if score >= beta  {
             return SearchInfo {
