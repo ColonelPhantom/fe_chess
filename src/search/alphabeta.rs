@@ -4,17 +4,20 @@ use board::Board;
 
 use super::quiesce::quiesce;
 use super::SearchInfo;
+use super::Score;
 
-pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize, prev_pv: &mut Vec<board::Move>, )
+pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, prev_pv: &mut Vec<board::Move>, )
  -> SearchInfo
 {
     let mut pv: Vec<board::Move> = vec![];
 
     if depthleft == 0 {
-        return SearchInfo{
-            score: quiesce(b, alpha, beta ),
-            pv: vec![],
-        };
+        if let ( Score::Value(p_alpha), Score::Value(p_beta) ) = (alpha, beta) {
+            return SearchInfo{
+                score: Score::Value(quiesce(b, p_alpha, p_beta )),
+                pv: vec![],
+            };
+        }
     }
 
     if let Some(m) = prev_pv.pop() {
@@ -36,6 +39,20 @@ pub fn alpha_beta(b: &mut Board, mut alpha: isize, beta: isize, depthleft: usize
     }
 
     let moves = movegen::movegen(b);
+
+    if moves.len() == 0 {
+        if !b.is_check(b.side_to_move).is_safe() {
+            return SearchInfo {
+                score: Score::Loss(0),
+                pv
+            }
+        } else {
+            return SearchInfo {
+                score: Score::Draw,
+                pv
+            }
+        }
+    }
 
     for m in moves {
         b.make(&m);

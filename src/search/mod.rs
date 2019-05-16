@@ -4,7 +4,8 @@ use board::Board;
 mod alphabeta;
 mod quiesce;
 
-enum Score {
+#[derive(Debug, Clone, Copy)]
+pub enum Score {
     Draw,
     Value(isize),
     Win(usize),
@@ -28,7 +29,6 @@ impl std::cmp::PartialOrd for Score {
         Some( self.cmp(o) )
     }
 }
-
 impl std::cmp::Ord for Score {
     fn cmp(&self, o: &Self) -> std::cmp::Ordering {
         use std::cmp::Ordering;
@@ -57,7 +57,6 @@ impl std::cmp::Ord for Score {
         }
     }
 }
-
 impl std::cmp::PartialEq for Score {
     fn eq(&self, o: &Self) -> bool {
         match self {
@@ -84,20 +83,34 @@ impl std::cmp::PartialEq for Score {
 }
 impl std::cmp::Eq for Score {}
 
+impl std::fmt::Display for Score {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self{
+            Score::Draw => write!(f, "Draw"),
+            Score::Value(p) => match p {
+                p if p > &0 => write!(f, "+{}", p),
+                p => write!(f, "{}", p),
+            }
+            Score::Win(d) => write!(f, "#{}", d),
+            Score::Loss(d) => write!(f, "#-{}", d),
+        }
+    }
+}
+
 
 
 #[derive(Debug, Clone)]
 pub struct SearchInfo {
-    pub score: isize,
+    pub score: Score,
     pub pv: Vec<board::Move>,
 }
 
 pub fn search(b: &mut Board, depth: usize)
  -> SearchInfo
 {
-    let mut si = alphabeta::alpha_beta(b, std::isize::MIN + 100, std::isize::MAX - 100, 1, &mut vec![]);
+    let mut si = alphabeta::alpha_beta(b, Score::Loss(std::usize::MAX), Score::Win(0), 1, &mut vec![]);
     for d in 2..depth+1 {
-        si = alphabeta::alpha_beta(b, std::isize::MIN + 100, std::isize::MAX - 100, d, &mut si.pv);
+        si = alphabeta::alpha_beta(b, Score::Loss(std::usize::MAX), Score::Win(0), d, &mut si.pv);
     }
 
     return si;
