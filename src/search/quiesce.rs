@@ -3,14 +3,16 @@ use crate::movegen;
 use crate::board;
 use board::Board;
 
+use super::Score;
 
-pub fn quiesce(b: &mut Board, mut alpha: isize, beta:isize ) -> isize {
+
+pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
     let sign = match b.side_to_move {
         board::WHITE => 1,
         board::BLACK => -1,
     };
     
-    let e = sign * eval(b);
+    let e = Score::Value(sign * eval(b));
     if e >= beta  {
         return beta;
     }

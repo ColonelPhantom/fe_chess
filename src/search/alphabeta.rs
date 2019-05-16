@@ -12,12 +12,10 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     let mut pv: Vec<board::Move> = vec![];
 
     if depthleft == 0 {
-        if let ( Score::Value(p_alpha), Score::Value(p_beta) ) = (alpha, beta) {
         return SearchInfo{
-                score: Score::Value(quiesce(b, p_alpha, p_beta )),
+            score: quiesce(b, alpha, beta),
             pv: vec![],
         };
-    }
     }
 
     if let Some(m) = prev_pv.pop() {
