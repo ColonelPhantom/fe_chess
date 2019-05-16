@@ -47,11 +47,11 @@ impl std::cmp::Ord for Score {
                 Score::Loss(_) => Ordering::Greater,
             }
             Score::Win(d) => match o {
-                Score::Win(dx) => d.cmp(dx),
+                Score::Win(dx) => dx.cmp(d),
                 _ => Ordering::Greater,
             }
             Score::Loss(d) => match o {
-                Score::Loss(dx) => dx.cmp(d),
+                Score::Loss(dx) => d.cmp(dx),
                 _ => Ordering::Less,
             }
         }
@@ -109,7 +109,7 @@ pub fn search(b: &mut Board, depth: usize)
  -> SearchInfo
 {
     let mut si = alphabeta::alpha_beta(b, Score::Loss(std::usize::MAX), Score::Win(0), 1, &mut vec![]);
-    for d in 2..depth+1 {
+    for d in 1..depth+1 {
         si = alphabeta::alpha_beta(b, Score::Loss(std::usize::MAX), Score::Win(0), d, &mut si.pv);
     }
 
