@@ -108,9 +108,9 @@ pub struct SearchInfo {
 pub fn search(b: &mut Board, depth: usize)
  -> SearchInfo
 {
-    let mut si = alphabeta::alpha_beta(b, Score::Loss(std::usize::MAX), Score::Win(0), 1, &mut vec![]);
+    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, &mut vec![]);
     for d in 1..depth+1 {
-        si = alphabeta::alpha_beta(b, Score::Loss(std::usize::MAX), Score::Win(0), d, &mut si.pv);
+        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, &mut si.pv);
     }
 
     return si;
