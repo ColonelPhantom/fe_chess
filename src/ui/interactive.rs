@@ -42,6 +42,11 @@ pub fn main() {
         let m = s.thought.clone().expect("No move found!");
         writeln!(io, "Move: {}", m)?;
         writeln!(io, "Score: {}", t.score)?;
+        while let Some(m) = t.pv.pop() {
+            print!("{} ",m);
+        }
+        println!();
+
         Ok(())
     });
 
