@@ -197,7 +197,7 @@ pub struct Unmove {
     pub captured: Piece,
     pub promoted: bool,
     pub revmov_clock: usize,
-    pub in_check: Option<ThreatInfo>,
+    pub check_cache: Option<ThreatInfo>,
     pub en_passant: EnPassantState,
     pub castling: Option<usize>,
     pub castling_rights: CastlingRights,
@@ -213,7 +213,7 @@ pub struct Board {
     pub en_passant: Option<Coord0x88>,
     pub revmov_clock: usize,
     pub king_pos: [Coord0x88; 2],
-    pub in_check: Option<ThreatInfo>,
+    check_cache: Option<ThreatInfo>,
     pub castling: CastlingRights,
 }
 
@@ -245,7 +245,7 @@ impl Board {
 
             king_pos: [c0x88::e1, c0x88::e8],
 
-            in_check: None,
+            check_cache: None,
 
             castling: [true, true, true, true],
         }
@@ -347,14 +347,14 @@ impl Board {
         // Vague but optimized code equivalent to but doesn't conflict with the borrow checker:
         //let in_check = self.in_check
         //self.in_check = None
-        let in_check = std::mem::replace(&mut self.in_check, None);
+        let in_check = std::mem::replace(&mut self.check_cache, None);
         // Now actually push
         self.unmake_stack.push( Unmove{
             from: cmove.from,
             to: cmove.to,
             captured: captured,
             promoted: promoted,
-            in_check: in_check,
+            check_cache: in_check,
             revmov_clock: revmov_clock,
             en_passant: undo_ep,
             castling: undo_castling,
@@ -374,7 +374,7 @@ impl Board {
             self[u.from] = self[u.to];
         }
         self[u.to] = u.captured;
-        self.in_check = u.in_check;
+        self.check_cache = u.check_cache;
         self.revmov_clock = u.revmov_clock;
         self.castling = u.castling_rights;
 
@@ -499,11 +499,11 @@ impl Board {
     }
 
     pub fn is_check(&mut self, side: Side) -> ThreatInfo {
-        match &self.in_check {
+        match &self.check_cache {
             None => {
                 let c = self.under_attack(self.king_pos[side as usize], side);
                 if side == self.side_to_move {
-                    self.in_check = Some(c.clone());
+                    self.check_cache = Some(c.clone());
                 }
                 return c;
             }
