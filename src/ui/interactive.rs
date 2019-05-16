@@ -37,9 +37,11 @@ pub fn main() {
     });
 
     shell.new_command_noargs("think", "Let the engine think about a move", |io,s| {
-        s.thought = search::search(&mut s.board, s.depth).pv.pop();
+        let mut t = search::search(&mut s.board, s.depth);
+        s.thought = t.pv.pop();
         let m = s.thought.clone().expect("No move found!");
         writeln!(io, "Move: {}", m)?;
+        writeln!(io, "Score: {}", t.score)?;
         Ok(())
     });
 
