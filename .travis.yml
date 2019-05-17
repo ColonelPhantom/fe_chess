@@ -3,6 +3,17 @@ rust:
   - stable
   - beta
   - nightly
+env:
+  - PROFILE=release
+  - PROFILE=debug
+matrix:
+  exclude:
+  - rust: nightly
+    env: PROFILE=release
+  - rust: beta
+    env: PROFILE=release
+  allow-failures:
+  - rust: nightly
 deploy:
   skip_cleanup: true
   draft: true
@@ -12,3 +23,6 @@ deploy:
   file: target/release/fe_chess
   on:
     repo: ColonelPhantom/fe_chess
+    conditon: "$PROFILE = release"
+    all_branches: true
+    rust: "stable"
