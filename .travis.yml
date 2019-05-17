@@ -1,1 +1,14 @@
 language: rust
+rust:
+  - stable
+  - beta
+  - nightly
+deploy:
+  skip_cleanup: true
+  draft: true
+  provider: releases
+  api_key:
+    secure: ovVy+DoZ8uShXC8ur0YA87D1Q3V5Lm6RO7Od8CO8g5g6i8qm3EP+z6kb9iXTm5rhv+/U5MSugFYUwugxbFmPOgXqATG+7bfVn9gbUro07MalcLC4cGvKaVvjKhhPRAMTLD4Ip6Lp0UArkn8VOU54rT2o0KBvXIATRDSlOBV9DbnnBCSzjA66jo8n9TFY97CBvQly0cYH/eLOh9P9iV+s3La6lUeL2HzuScAEQCY64b1BQ2PTy5oSmxUUzwZC03QA5gv1PX4D6/puBvoRNjq+0wtwBKO3qRKeVA3f1lz8FzyOA9z6rH7a2iUa5dLKRaNXMIHGlpK+8NNm2bzoXXIsoK7L1+wezUpv/QctXsoOR1TRvZvwb88jT6h9jX+klCc52Rif783Zg/bego7bKbQ6hi7FVv8WafPiodxFZfOPtw0+aDN4D4PfC/EA9BblANHx8jWjUgHV5q0vcNeIA+PSnN0lysmSzOUMrWKXvjp26Om6et2+KeBsAFKRkAKZeAc6KNUqyS054ERpALSDGD79Kh878Oiiz7sAyG241dYndkHchVrLqgIDz6frgb1CbbV4A0bpn9RHEWM5GyfZcWravNFlHi4BRk3+JRR9DgA7ekRkG4EZNByUVL7JjdkaTSV7vCZBMxahk2O1PoBslAhHBExPYQWCoeWtx0TQkSm87Wk=
+  file: target/release/fe_chess
+  on:
+    repo: ColonelPhantom/fe_chess
