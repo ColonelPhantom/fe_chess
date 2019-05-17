@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ColonelPhantom/fe_chess.svg?branch=master)](https://travis-ci.org/ColonelPhantom/fe_chess)
+
 # fe_chess
 A currently 0x88 mailbox-based chess engine in Rust
 
