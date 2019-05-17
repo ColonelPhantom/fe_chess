@@ -28,6 +28,8 @@ matrix:
   allow-failures:
   - rust: nightly
 
+before:deploy:
+- find
 
 deploy:
   skip_cleanup: true
