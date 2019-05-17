@@ -1,16 +1,5 @@
 language: rust
 cache: cargo
-rust:
-  - stable
-  - beta
-  - nightly
-os:
-  - windows
-  - linux
-  - osx
-env:
-  - PROFILE=release
-  - PROFILE=debug
 
 matrix:
   include:
