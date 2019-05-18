@@ -23,7 +23,7 @@ pub fn main() {
     shell.new_command_noargs("print", "Prints the current board", |_,s| { super::print_board(&s.board); Ok(())});
     shell.new_command_noargs("undo", "Undoes the most recent move", |_,s| { s.board.unmake(); s.thought = None; Ok(())});
 
-    shell.new_command("do", "Perform a move (format: O-O, b1c3, e7e8q", 1, |io,s,a| {
+    shell.new_command("do", "Perform a move (format: O-O, b1c3, e7e8q)", 1, |io,s,a| {
         // match board::Move::from_str(a, s.board) {
         //     Some(m) => s.board.make(m),
         //     Err(e) => Err(e),
