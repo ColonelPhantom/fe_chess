@@ -245,13 +245,7 @@ impl Board {
             revmov_clock: 0,
             en_passant: None,
             king_pos: [c0x88::e1, c0x88::e8],
-<<<<<<< HEAD
-
             check_cache: None,
-
-=======
-            in_check: None,
->>>>>>> Add zobrist_init
             castling: [true, true, true, true],
             zobrist: 0,
         };
