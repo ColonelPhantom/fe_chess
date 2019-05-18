@@ -34,6 +34,10 @@ pub fn c0x88(file: isize, rank: isize) -> Coord0x88 {
     Wrapping(16 * rank as usize) + Wrapping( file as usize )
 }
 
+pub fn c8x8(file: isize, rank: isize) -> Coord8x8 {
+    (8*rank + file) as usize
+}
+
 // allow (-1, 1) format to determine offset from file and rank difference (same order as h5 but with ints)
 pub fn o0x88(file: isize, rank: isize) -> Coord0x88 {
     Wrapping(((rank * 0x10) + file) as usize)
