@@ -16,6 +16,19 @@ const BISHOP_PAIR_BONUS: ValCp = 25;
 
 const MOBIL_VAL: ValCp = 5;
 
+fn mobil_eval(b: &Board, p: &Piece, from: Coord0x88, offset: Coord0x88) -> isize {
+    let mut count = 0;
+    let mut c = from + offset;
+    while c.0 & 0x88 == 0 {
+        count += 1;
+        if b[c].piece_type != PieceType::None {
+            break;
+        }
+        c += offset;
+    };
+    return count;
+}
+
 pub fn eval(b: &mut Board) -> isize {
     let mut score = 0;
     let b_sign = match b.side_to_move {
@@ -32,13 +45,40 @@ pub fn eval(b: &mut Board) -> isize {
             match p.color {
                 WHITE => {
                     p_sign = 1;
-                    lookup_c = c8x8(file, rank);
+                    lookup_c = c8x8(file, 7 - rank);
                 }
                 BLACK => {
                     p_sign = -1;
-                    lookup_c = c8x8(file, 7 - rank);
+                    lookup_c = c8x8(file, rank);
                 }
             };
+            // let mobility_score = match p.piece_type {
+            //     PieceType::Knight => 8,
+            //     PieceType::Bishop => MOBIL_VAL * (
+            //         mobil_eval(b, &p, c, o0x88( 1,  1)) +
+            //         mobil_eval(b, &p, c, o0x88(-1,  1)) +
+            //         mobil_eval(b, &p, c, o0x88( 1, -1)) +
+            //         mobil_eval(b, &p, c, o0x88(-1, -1))
+            //     ),
+            //     PieceType::Rook => MOBIL_VAL * (
+            //         mobil_eval(b, &p, c, o0x88( 1,  0)) +
+            //         mobil_eval(b, &p, c, o0x88(-1,  0)) +
+            //         mobil_eval(b, &p, c, o0x88( 0,  1)) +
+            //         mobil_eval(b, &p, c, o0x88( 0, -1))
+            //     ),
+            //     PieceType::Queen => MOBIL_VAL * (
+            //         mobil_eval(b, &p, c, o0x88( 1,  1)) +
+            //         mobil_eval(b, &p, c, o0x88(-1,  1)) +
+            //         mobil_eval(b, &p, c, o0x88( 1, -1)) +
+            //         mobil_eval(b, &p, c, o0x88(-1, -1)) +
+            //         mobil_eval(b, &p, c, o0x88( 1,  0)) +
+            //         mobil_eval(b, &p, c, o0x88(-1,  0)) +
+            //         mobil_eval(b, &p, c, o0x88( 0,  1)) +
+            //         mobil_eval(b, &p, c, o0x88( 0, -1))
+            //     ),
+            //     _ => 0,
+            // };
+            let mobility_score = 0;
             let p_score = match p.piece_type {
                 PieceType::None => 0,
                 PieceType::Pawn => PAWN_VAL + pst::PAWN[lookup_c],
@@ -53,12 +93,9 @@ pub fn eval(b: &mut Board) -> isize {
                 PieceType::King => KING_VAL + pst::KING_MID[lookup_c],  // TODO: taper the eval or something.
                 PieceType::Any => 0,
             } * p_sign;
-            score += p_score;
+            score += p_score + mobility_score;
         }
     }
-
-    // score += MOBIL_VAL * b_sign * movegen::movegen(b).len() as isize;
-    // score -= MOBIL_VAL * b_sign * movegen::enemygen::enemygen(b).len() as isize;
 
     return score;
 }
