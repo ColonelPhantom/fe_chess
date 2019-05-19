@@ -273,14 +273,10 @@ impl Board {
                 CR_KING => {
                     self[kc + o0x88(1, 0)] = self[kc + o0x88(3, 0)];
                     self[kc + o0x88(3, 0)] = pieces::NONE;
-
-                    self.castling[CR_KING + self.side_to_move as usize] = false;
                 }
                 CR_QUEEN => {
                     self[kc + o0x88(-1, 0)] = self[kc + o0x88(-4, 0)];
                     self[kc + o0x88(-4, 0)] = pieces::NONE;
-
-                    self.castling[CR_QUEEN + self.side_to_move as usize] = false;
                 }
                 _ => panic!("Castling not with value CR_KING or CR_QUEEN")
             }
