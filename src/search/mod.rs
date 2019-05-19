@@ -8,9 +8,9 @@ pub mod transtable;
 #[derive(Debug, Clone, Copy)]
 pub enum Score {
     Draw,
-    Value(isize),
-    Win(usize),
-    Loss(usize),
+    Value(i32),
+    Win(u16),
+    Loss(u16),
 }
 impl std::ops::Neg for Score {
     type Output = Self;

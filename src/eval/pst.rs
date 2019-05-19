@@ -1,6 +1,6 @@
 // Piece square tables mostly from https://www.chessprogramming.org/Simplified_Evalutation_Function
 // pawn
-pub const PAWN: [isize; 64] = [
+pub const PAWN: [super::ValCp; 64] = [
  0,  0,  0,  0,  0,  0,  0,  0,
 50, 50, 50, 50, 50, 50, 50, 50,
 10, 10, 20, 30, 30, 20, 10, 10,
@@ -11,7 +11,7 @@ pub const PAWN: [isize; 64] = [
  0,  0,  0,  0,  0,  0,  0,  0
 ];
 
-pub const KNIGHT: [isize; 64] = [
+pub const KNIGHT: [super::ValCp; 64] = [
 -50,-40,-30,-30,-30,-30,-40,-50,
 -40,-20,  0,  0,  0,  0,-20,-40,
 -30,  0, 10, 15, 15, 10,  0,-30,
@@ -22,7 +22,7 @@ pub const KNIGHT: [isize; 64] = [
 -50,-40,-30,-30,-30,-30,-40,-50,
 ];
 
-pub const BISHOP: [isize; 64] = [
+pub const BISHOP: [super::ValCp; 64] = [
 -20,-10,-10,-10,-10,-10,-10,-20,
 -10,  0,  0,  0,  0,  0,  0,-10,
 -10,  0,  5, 10, 10,  5,  0,-10,
@@ -33,7 +33,7 @@ pub const BISHOP: [isize; 64] = [
 -20,-10,-10,-10,-10,-10,-10,-20,
 ];
 
-pub const ROOK: [isize; 64] = [
+pub const ROOK: [super::ValCp; 64] = [
   0,  0,  0,  0,  0,  0,  0,  0,
   5, 10, 10, 10, 10, 10, 10,  5,
  -5,  0,  0,  0,  0,  0,  0, -5,
@@ -44,7 +44,7 @@ pub const ROOK: [isize; 64] = [
   0,  0,  0,  5,  5,  0,  0,  0
 ];
 
-pub const QUEEN: [isize; 64] = [
+pub const QUEEN: [super::ValCp; 64] = [
 -20,-10,-10, -5, -5,-10,-10,-20,
 -10,  0,  0,  0,  0,  0,  0,-10,
 -10,  0,  5,  5,  5,  5,  0,-10,
@@ -55,7 +55,7 @@ pub const QUEEN: [isize; 64] = [
 -20,-10,-10, -5, -5,-10,-10,-20
 ];
 
-pub const KING_MID: [isize; 64] = [
+pub const KING_MID: [super::ValCp; 64] = [
 -30,-40,-40,-50,-50,-40,-40,-30,
 -30,-40,-40,-50,-50,-40,-40,-30,
 -30,-40,-40,-50,-50,-40,-40,-30,
@@ -66,7 +66,7 @@ pub const KING_MID: [isize; 64] = [
  20, 30, 10,  0,  0, 10, 30, 20,
 ];
 
-pub const KING_END: [isize; 64] = [
+pub const KING_END: [super::ValCp; 64] = [
 -50,-40,-30,-20,-20,-30,-40,-50,
 -30,-20,-10,  0,  0,-10,-20,-30,
 -30,-10, 20, 30, 30, 20,-10,-30,

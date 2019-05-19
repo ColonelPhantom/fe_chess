@@ -3,7 +3,7 @@ use crate::movegen;
 
 mod pst;
 
-type ValCp = isize;
+type ValCp = i32;
 
 const KING_VAL: ValCp = 200000;
 const QUEEN_VAL: ValCp = 900;
@@ -29,8 +29,8 @@ fn mobil_eval(b: &Board, p: &Piece, from: Coord0x88, offset: Coord0x88) -> isize
     return count;
 }
 
-pub fn eval(b: &mut Board) -> isize {
-    let mut score = 0;
+pub fn eval(b: &mut Board) -> i32 {
+    let mut score: i32 = 0;
     let b_sign = match b.side_to_move {
         WHITE => 1,
         BLACK => -1,
@@ -84,7 +84,7 @@ pub fn eval(b: &mut Board) -> isize {
                 PieceType::Pawn => PAWN_VAL + pst::PAWN[lookup_c],
                 PieceType::Knight => KNIGHT_VAL + pst::KNIGHT[lookup_c],
                 PieceType::Bishop => {
-                    let pairbonus = bishop_present[p.color as usize] as isize * BISHOP_PAIR_BONUS;
+                    let pairbonus = bishop_present[p.color as usize] as ValCp * BISHOP_PAIR_BONUS;
                     bishop_present[p.color as usize] = true;
                     BISHOP_VAL + pairbonus + pst::BISHOP[lookup_c]
                 },
