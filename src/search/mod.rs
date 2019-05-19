@@ -3,6 +3,7 @@ use board::Board;
 
 mod alphabeta;
 mod quiesce;
+mod transtable;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Score {
