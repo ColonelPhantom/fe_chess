@@ -20,6 +20,7 @@ pub fn main() {
     println!("Sizeof PieceType: {}", std::mem::size_of::<board::PieceType>());
     println!("Sizeof Piece: {}", std::mem::size_of::<board::Piece>());
     println!("Sizeof Coord0x88: {}", std::mem::size_of::<board::Coord0x88>());
+    println!("Sizeof EPState: {}", std::mem::size_of::<board::EnPassantState>());
     
 
 }
