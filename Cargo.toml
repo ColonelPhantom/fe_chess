@@ -1,6 +1,6 @@
 [package]
 name = "fe_chess"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Quinten Kock <quinten@quinten.space>"]
 edition = "2018"
 
