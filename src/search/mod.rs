@@ -3,13 +3,14 @@ use board::Board;
 
 mod alphabeta;
 mod quiesce;
+pub mod transtable;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Score {
     Draw,
-    Value(isize),
-    Win(usize),
-    Loss(usize),
+    Value(i32),
+    Win(u16),
+    Loss(u16),
 }
 impl std::ops::Neg for Score {
     type Output = Self;
@@ -105,13 +106,12 @@ pub struct SearchInfo {
     pub pv: Vec<board::Move>,
 }
 
-pub fn search(b: &mut Board, depth: usize)
- -> SearchInfo
+pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo
 {
-    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, &mut vec![]);
+    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, &mut vec![], tt);
     for d in 1..depth+1 {
-        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, &mut si.pv);
+        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, &mut si.pv, tt);
     }
-
+    println!("Transtable filled with {} entries (capacity {})", tt.filled(), tt.len);
     return si;
 }

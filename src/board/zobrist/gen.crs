@@ -1,0 +1,26 @@
+#!/usr/bin/env run-cargo-script
+// cargo-deps: rand
+
+extern crate rand;
+use rand::Rng;
+
+fn main() {
+    let mut rng = rand::thread_rng();
+    
+    let pieces = ["WPAWN", "WKNIGHT", "WBISHOP", "WROOK", "WQUEEN", "WKING", "BPAWN", "BKNIGHT", "BBISHOP", "BROOK", "BQUEEN", "BKING"];
+
+    for p in &pieces {
+        print!("pub const {}: [u64; 64] = [", p);
+        for i in 0..64 {
+            print!("{:16#x}, ", rng.gen::<u64>());
+        }
+        println!("];");
+    }
+
+    println!("pub const SIDE_TO_MOVE: u64 = {:16#x};", rng.gen::<u64>());
+    
+    println!("pub const CASTLING: [u64; 4] = [{:16#x}, {:16#x}, {:16#x}, {:16#x}];", rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>());
+
+    println!("pub const ENPASSANT: [u64; 8] = [{:16#x}, {:16#x}, {:16#x}, {:16#x}, {:16#x}, {:16#x}, {:16#x}, {:16#x}];", rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>(), rng.gen::<u64>());
+
+}
