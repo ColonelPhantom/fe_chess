@@ -1,7 +1,7 @@
 use crate::board;
 use crate::search;
 
-fn expandEnPassant(ep: u8) -> board::EnPassantState {
+fn expand_en_passant(ep: u8) -> board::EnPassantState {
     use board::EnPassantState::*;
     use std::num::Wrapping;
     match ep {
@@ -11,7 +11,7 @@ fn expandEnPassant(ep: u8) -> board::EnPassantState {
     }
 }
 
-fn compressEnPassant(ep: &board::EnPassantState) -> u8 {
+fn compress_en_passant(ep: &board::EnPassantState) -> u8 {
     match ep {
         board::EnPassantState::None => 0,
         board::EnPassantState::Possible(c) => c.0 as u8,
@@ -28,7 +28,7 @@ struct MoveCompact {
     en_passant: u8,
 }
 impl MoveCompact {
-    fn from_Move(m: &board::Move) -> Self {
+    fn from_move(m: &board::Move) -> Self {
         Self {
             from: m.from.0 as u8,
             to: m.to.0 as u8,
@@ -37,10 +37,10 @@ impl MoveCompact {
                 None => 255,
                 Some(c) => c as u8,
             },
-            en_passant: compressEnPassant(&m.en_passant),
+            en_passant: compress_en_passant(&m.en_passant),
         }
     }
-    fn to_Move(&self) -> board::Move {
+    pub fn to_move(&self) -> board::Move {
         let castling = match self.castling {
             255 => None,
             0..=3 => Some(self.castling as usize),
@@ -51,7 +51,7 @@ impl MoveCompact {
             from: Wrapping(self.from as usize),
             to: Wrapping(self.to as usize),
             castling,
-            en_passant: expandEnPassant(self.en_passant),
+            en_passant: expand_en_passant(self.en_passant),
             promote_to: self.promote_to,
         }
     }
@@ -59,10 +59,10 @@ impl MoveCompact {
 
 #[derive(Copy, Clone)]
 pub struct TtEntry {
-    full_zobrist: u64,
+    pub full_zobrist: u64,
     first_move: MoveCompact,
-    depthleft: u16,
-    eval_score: search::Score,
+    pub depthleft: u16,
+    pub eval_score: search::Score,
 }
 impl Default for TtEntry {
     fn default() -> Self {
@@ -80,6 +80,11 @@ impl Default for TtEntry {
         }
     }
 } 
+impl TtEntry {
+    pub fn get_move(&self) -> board::Move {
+        self.first_move.to_move()
+    }
+}
 
 pub struct TransTable {
     t: Vec<TtEntry>,
@@ -97,7 +102,7 @@ impl TransTable {
     pub fn put(&mut self, zob: u64, m: &board::Move, depth: u16, score: search::Score) {
         self.t[zob as usize & self.len] = TtEntry {
             full_zobrist: zob,
-            first_move: MoveCompact::from_Move(m),
+            first_move: MoveCompact::from_move(m),
             depthleft: depth,
             eval_score: score,
         };
