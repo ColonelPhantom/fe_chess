@@ -108,12 +108,16 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         };
         b.unmake();
         if score >= beta  {
+            // Store self move in TT, move field is refutation move
+            tt.put(b.zobrist, &m, depthleft as u16, score);
             return SearchInfo {
                 score: beta,
                 pv
             };
         }
         if score > alpha  {
+            // Store self move in TT, next move is the best move.
+            tt.put(b.zobrist, &m, depthleft as u16, score);
             alpha = score;
             pv = si.pv;
             pv.push(m);
