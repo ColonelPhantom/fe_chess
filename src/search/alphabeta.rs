@@ -23,14 +23,17 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         None => (),
         Some(tt_entry) => {
             if tt_entry.depthleft >= depthleft as u16 {
-                println!("Full table hit!");
+                //println!("Full table hit!");
                 return SearchInfo{
                     score: tt_entry.eval_score,
-                    pv: vec![]
+                    pv: match tt_entry.get_move() {
+                        None => vec![],
+                        Some(m) => vec![m],
+                    }
                 }
             } else if tt_entry.get_move().is_some() {
                 // Ttable entry too shallow, use it only for move ordering
-                println!("Partial table hit!");
+                //println!("Partial table hit!");
                 let m = tt_entry.get_move().unwrap();
                 b.make(&m);
                 let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv, tt);
