@@ -112,6 +112,6 @@ pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> S
     for d in 1..depth+1 {
         si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, &mut si.pv, tt);
     }
-
+    println!("Transtable filled with {} entries (capacity {})", tt.filled(), tt.len);
     return si;
 }
