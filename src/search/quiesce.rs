@@ -5,6 +5,7 @@ use board::Board;
 
 use super::Score;
 
+const MAX_DELTA: i32 = 1000;
 
 pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
     let sign = match b.side_to_move {
@@ -12,13 +13,20 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
         board::BLACK => -1,
     };
     
-    let stand_pat = Score::Value(sign * eval(b));
+    let sp = sign * eval(b);
+    let stand_pat = Score::Value(sp);
 
     if stand_pat >= beta  {
         return beta;
     }
     if alpha < stand_pat  {
         alpha = stand_pat;
+    }
+    if let Score::Value(a) = alpha {
+        if sp < a - MAX_DELTA {
+            //println!("Delta pruned");
+            return alpha;
+        }
     }
 
     let cap_moves = movegen::capturegen::cap_gen(b);
