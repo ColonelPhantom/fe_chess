@@ -73,14 +73,14 @@ pub const CR_QUEEN: usize = 2;
 pub const CR_KING: usize = 0;
 // CastlingRights[CR_{QUEEN|KING} + side_to_move as usize]
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum EnPassantState {
     None,
     Possible ( Coord0x88 ),
     Capture ( Coord0x88 ),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Move {
     pub from: Coord0x88,
     pub to: Coord0x88,
