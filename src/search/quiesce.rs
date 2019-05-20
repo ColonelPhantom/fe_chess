@@ -12,12 +12,13 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
         board::BLACK => -1,
     };
     
-    let e = Score::Value(sign * eval(b));
-    if e >= beta  {
+    let stand_pat = Score::Value(sign * eval(b));
+
+    if stand_pat >= beta  {
         return beta;
     }
-    if alpha < e  {
-        alpha = e;
+    if alpha < stand_pat  {
+        alpha = stand_pat;
     }
 
     let cap_moves = movegen::capturegen::cap_gen(b);
