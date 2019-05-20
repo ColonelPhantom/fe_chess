@@ -19,28 +19,63 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         };
     }
 
-    if let Some(m) = prev_pv.pop() {
-        b.make(&m);
-        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv, tt);
-        let score = match -si.score {
-            Score::Win(d) => Score::Win(d+1),
-            Score::Loss(d) => Score::Loss(d+1),
-            Score::Value(p) => Score::Value(p),
-            Score::Draw => Score::Draw,
-        };
-        b.unmake();
-        if score >= beta  {
-            return SearchInfo {
-                score: beta,
-                pv
-            };
-        }
-        if score > alpha  {
-            alpha = score;
-            pv = si.pv;
-            pv.push(m);
+    match tt.get(b.zobrist) {
+        None => (),
+        Some(tt_entry) => {
+            if tt_entry.depthleft >= depthleft as u16 {
+                return SearchInfo{
+                    score: tt_entry.eval_score,
+                    pv: vec![tt_entry.get_move()]
+                }
+            } else {
+                // Ttable entry too shallow, use it only for move ordering
+                let m = tt_entry.get_move();
+                b.make(&m);
+                let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv, tt);
+                let score = match -si.score {
+                    Score::Win(d) => Score::Win(d+1),
+                    Score::Loss(d) => Score::Loss(d+1),
+                    Score::Value(p) => Score::Value(p),
+                    Score::Draw => Score::Draw,
+                };
+                b.unmake();
+                if score >= beta  {
+                    return SearchInfo {
+                        score: beta,
+                        pv
+                    };
+                }
+                if score > alpha  {
+                    alpha = score;
+                    pv = si.pv;
+                    pv.push(m);
+                }
+            }
         }
     }
+    
+    // if let Some(m) = prev_pv.pop() {
+    //     b.make(&m);
+    //     let si = alpha_beta(b, -beta, -alpha, depthleft - 1, prev_pv, tt);
+    //     let score = match -si.score {
+    //         Score::Win(d) => Score::Win(d+1),
+    //         Score::Loss(d) => Score::Loss(d+1),
+    //         Score::Value(p) => Score::Value(p),
+    //         Score::Draw => Score::Draw,
+    //     };
+    //     b.unmake();
+    //     if score >= beta  {
+    //         return SearchInfo {
+    //             score: beta,
+    //             pv
+    //         };
+    //     }
+    //     if score > alpha  {
+    //         alpha = score;
+    //         pv = si.pv;
+    //         pv.push(m);
+    //     }
+    // }
 
     let moves = movegen::movegen(b);
 
