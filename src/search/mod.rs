@@ -106,12 +106,11 @@ pub struct SearchInfo {
     pub pv: Vec<board::Move>,
 }
 
-pub fn search(b: &mut Board, depth: usize)
- -> SearchInfo
+pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo
 {
-    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, &mut vec![]);
+    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, &mut vec![], tt);
     for d in 1..depth+1 {
-        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, &mut si.pv);
+        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, &mut si.pv, tt);
     }
 
     return si;

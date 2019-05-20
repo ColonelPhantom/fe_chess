@@ -3,7 +3,7 @@ use crate::*;
 pub fn main() {
     let mut b = board::Board::new();
 
-    let mut searchinfo = search::search(&mut b, 5);
+    let mut searchinfo = search::search(&mut b, 5, &mut search::transtable::TransTable::new(16));
     while let Some(m) = searchinfo.pv.pop() {
         println!(
             "{:02x} {:02x} {:?} {:?} {:?}",

@@ -6,13 +6,15 @@ pub fn main() {
     struct State {
         thought: Option<board::Move>,
         board: board::Board,
-        depth: usize
+        depth: usize,
+        transtable: search::transtable::TransTable,
     };
 
     let s = State {
         thought: None,
         board: board::Board::new(),
         depth: 5,
+        transtable: search::transtable::TransTable::new(16) // 1.5 MiB
     };
     let mut shell = shrust::Shell::new( s );
 
@@ -37,7 +39,7 @@ pub fn main() {
     });
 
     shell.new_command_noargs("think", "Let the engine think about a move", |io,s| {
-        let mut t = search::search(&mut s.board, s.depth);
+        let mut t = search::search(&mut s.board, s.depth, &mut s.transtable);
         s.thought = t.pv.pop();
         let m = s.thought.clone().expect("No move found!");
         writeln!(io, "Move: {}", m)?;
