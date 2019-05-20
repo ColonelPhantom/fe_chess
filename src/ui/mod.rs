@@ -27,6 +27,6 @@ pub fn print_board(b: &board::Board) {
         }
         println!("");
     }
-    println!("Kingpos: {:02x}, {:02x}", b.king_pos[board::WHITE as usize], b.king_pos[board::BLACK as usize]);
+    //println!("Kingpos: {:02x}, {:02x}", b.king_pos[board::WHITE as usize], b.king_pos[board::BLACK as usize]);
 }
 
