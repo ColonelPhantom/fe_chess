@@ -14,7 +14,7 @@ pub fn main() {
         thought: None,
         board: board::Board::new(),
         depth: 5,
-        transtable: search::transtable::TransTable::new(16) // 1.5 MiB
+        transtable: search::transtable::TransTable::new(24) // 384 MiB
     };
     let mut shell = shrust::Shell::new( s );
 
