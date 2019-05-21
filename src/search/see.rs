@@ -1,9 +1,7 @@
-use crate::movegen;
 use crate::board;
-use board::Board;
 
 pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32 {
-    let mut att = b.under_attack(sq, !side);    // Who of us can attack the opponent in sq?
+    let att = b.under_attack(sq, !side);    // Who of us can attack the opponent in sq?
     // Get the least valuable attacker
     let lva = match att {
         board::ThreatInfo::Safe => {return 0;}, 

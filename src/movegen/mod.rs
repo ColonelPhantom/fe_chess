@@ -37,7 +37,7 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
 
         match p.piece_type {
             PieceType::None => {},
-            PieceType::Any => {},
+            //PieceType::Any => {},
             PieceType::Pawn => {
                 macro_rules! gen_promotions {
                     ($from:expr, $to:expr) => {

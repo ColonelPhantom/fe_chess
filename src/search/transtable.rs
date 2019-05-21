@@ -118,6 +118,7 @@ impl TransTable {
         }
     }
 
+    #[allow(dead_code)]
     pub fn filled(&self) -> usize {
         let mut c = 0;
         for i in 0..self.len {

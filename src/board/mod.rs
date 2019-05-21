@@ -12,7 +12,7 @@ pub enum PieceType {
     Rook = 4,
     Queen = 5,
     King = 6,
-    Any = 7
+    //Any = 7
 }
 impl Default for PieceType {
     fn default() -> Self { PieceType::None }
@@ -48,6 +48,7 @@ pub fn o0x88(file: isize, rank: isize) -> Coord0x88 {
 pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
     (sq0x88.0 + (sq0x88.0 & 0x7)) >> 1
 }
+#[allow(dead_code)]
 pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
     std::num::Wrapping(sq8x8 + (sq8x8 & 0xF8))
 }

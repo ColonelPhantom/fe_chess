@@ -1,5 +1,4 @@
 use crate::board::*;
-use crate::movegen;
 
 mod pst;
 
@@ -16,7 +15,7 @@ const BISHOP_PAIR_BONUS: ValCp = 25;
 
 const MOBIL_VAL: ValCp = 5;
 
-fn mobil_eval(b: &Board, p: &Piece, from: Coord0x88, offset: Coord0x88) -> ValCp {
+fn mobil_eval(b: &Board, _p: &Piece, from: Coord0x88, offset: Coord0x88) -> ValCp {
     let mut count = 0;
     let mut c = from + offset;
     while c.0 & 0x88 == 0 {
@@ -42,10 +41,10 @@ pub fn piece_val(p: PieceType) -> ValCp {
 }
 pub fn eval(b: &mut Board) -> i32 {
     let mut score: i32 = 0;
-    let b_sign = match b.side_to_move {
-        WHITE => 1,
-        BLACK => -1,
-    };
+    // let b_sign = match b.side_to_move {
+    //     WHITE => 1,
+    //     BLACK => -1,
+    // };
     let mut bishop_present = [false, false];
     for rank in 0..8 {
         for file in 0..8 {
@@ -102,7 +101,7 @@ pub fn eval(b: &mut Board) -> i32 {
                 PieceType::Rook => ROOK_VAL + pst::ROOK[lookup_c],
                 PieceType::Queen => QUEEN_VAL + pst::QUEEN[lookup_c],
                 PieceType::King => KING_VAL + pst::KING_MID[lookup_c],  // TODO: taper the eval or something.
-                PieceType::Any => 0,
+                //PieceType::Any => 0,
             } * p_sign;
             score += p_score + mobility_score;
         }

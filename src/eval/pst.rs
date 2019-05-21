@@ -66,6 +66,8 @@ pub const KING_MID: [super::ValCp; 64] = [
  20, 30, 10,  0,  0, 10, 30, 20,
 ];
 
+// TODO: use KING_END table in the endgame (tapered eval?)
+#[allow(dead_code)]
 pub const KING_END: [super::ValCp; 64] = [
 -50,-40,-30,-20,-20,-30,-40,-50,
 -30,-20,-10,  0,  0,-10,-20,-30,
