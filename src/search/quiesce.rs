@@ -8,8 +8,8 @@ use super::Score;
 const MAX_DELTA: i32 = 1000;
 const SEE_DELTA: i32 = 100;
 
-pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
-    let sign = match b.side_to_move {
+pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mut super::transtable::TransTable ) -> Score {
+     let sign = match b.side_to_move {
         board::WHITE => 1,
         board::BLACK => -1,
     };
@@ -23,6 +23,14 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
     if alpha < stand_pat  {
         alpha = stand_pat;
     }
+
+    match tt.get(b.zobrist) {
+        None => {},
+        Some(tt_entry) => {
+            // TODO: maybe TT move ordering?
+            return tt_entry.eval_score;
+        }
+    };
 
     // Delta pruning
     match alpha {
@@ -56,15 +64,17 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
             b.unmake();
             continue;
         }
-        let score = -quiesce(b, -beta, -alpha );
+        let score = -quiesce(b, -beta, -alpha, qdepth + 1, tt);
         b.unmake();
 
         if score >= beta  {
+            tt.put(b.zobrist, Some(m), -qdepth, score);
             return beta;
         }
         if score > alpha  {
            alpha = score;
         }
     }
+    tt.put(b.zobrist, None, -qdepth, alpha);
     return alpha;
 }

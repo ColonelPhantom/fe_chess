@@ -14,7 +14,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     if depthleft == 0 {
         return SearchInfo{
-            score: quiesce(b, alpha, beta),
+            score: quiesce(b, alpha, beta, 1, tt),
             pv: vec![],
         };
     }

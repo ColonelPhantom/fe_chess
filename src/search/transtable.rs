@@ -69,7 +69,7 @@ impl Default for TtEntry {
         Self {
             full_zobrist: 0,
             first_move: None,
-            depthleft: 0,
+            depthleft: std::i16::MIN,
             eval_score: search::Score::Draw
         }
     }
@@ -98,6 +98,7 @@ impl TransTable {
 
     pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score) {
         let key = zob & self.len;
+        if depth < self.t[key as usize].depthleft { return; }
         self.t[key as usize] = TtEntry {
             full_zobrist: zob,
             first_move: match m {
