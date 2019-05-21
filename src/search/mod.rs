@@ -119,9 +119,10 @@ pub struct SearchInfo {
 pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo
 {
     let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, tt);
-    for d in 1..depth+1 {
+    for d in 2..=depth {
         si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, tt);
     }
+    // let si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
     //println!("Transtable filled with {} entries (capacity {})", tt.filled(), tt.len);
     return si;
 }
