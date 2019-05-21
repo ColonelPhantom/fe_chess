@@ -16,7 +16,7 @@ const BISHOP_PAIR_BONUS: ValCp = 25;
 
 const MOBIL_VAL: ValCp = 5;
 
-fn mobil_eval(b: &Board, p: &Piece, from: Coord0x88, offset: Coord0x88) -> isize {
+fn mobil_eval(b: &Board, p: &Piece, from: Coord0x88, offset: Coord0x88) -> ValCp {
     let mut count = 0;
     let mut c = from + offset;
     while c.0 & 0x88 == 0 {
@@ -52,33 +52,33 @@ pub fn eval(b: &mut Board) -> i32 {
                     lookup_c = c8x8(file, rank);
                 }
             };
-            // let mobility_score = match p.piece_type {
-            //     PieceType::Knight => 8,
-            //     PieceType::Bishop => MOBIL_VAL * (
-            //         mobil_eval(b, &p, c, o0x88( 1,  1)) +
-            //         mobil_eval(b, &p, c, o0x88(-1,  1)) +
-            //         mobil_eval(b, &p, c, o0x88( 1, -1)) +
-            //         mobil_eval(b, &p, c, o0x88(-1, -1))
-            //     ),
-            //     PieceType::Rook => MOBIL_VAL * (
-            //         mobil_eval(b, &p, c, o0x88( 1,  0)) +
-            //         mobil_eval(b, &p, c, o0x88(-1,  0)) +
-            //         mobil_eval(b, &p, c, o0x88( 0,  1)) +
-            //         mobil_eval(b, &p, c, o0x88( 0, -1))
-            //     ),
-            //     PieceType::Queen => MOBIL_VAL * (
-            //         mobil_eval(b, &p, c, o0x88( 1,  1)) +
-            //         mobil_eval(b, &p, c, o0x88(-1,  1)) +
-            //         mobil_eval(b, &p, c, o0x88( 1, -1)) +
-            //         mobil_eval(b, &p, c, o0x88(-1, -1)) +
-            //         mobil_eval(b, &p, c, o0x88( 1,  0)) +
-            //         mobil_eval(b, &p, c, o0x88(-1,  0)) +
-            //         mobil_eval(b, &p, c, o0x88( 0,  1)) +
-            //         mobil_eval(b, &p, c, o0x88( 0, -1))
-            //     ),
-            //     _ => 0,
-            // };
-            let mobility_score = 0;
+            let mobility_score = match p.piece_type {
+                PieceType::Knight => 8,
+                PieceType::Bishop => MOBIL_VAL * (
+                    mobil_eval(b, &p, c, o0x88( 1,  1)) +
+                    mobil_eval(b, &p, c, o0x88(-1,  1)) +
+                    mobil_eval(b, &p, c, o0x88( 1, -1)) +
+                    mobil_eval(b, &p, c, o0x88(-1, -1))
+                ),
+                PieceType::Rook => MOBIL_VAL * (
+                    mobil_eval(b, &p, c, o0x88( 1,  0)) +
+                    mobil_eval(b, &p, c, o0x88(-1,  0)) +
+                    mobil_eval(b, &p, c, o0x88( 0,  1)) +
+                    mobil_eval(b, &p, c, o0x88( 0, -1))
+                ),
+                PieceType::Queen => MOBIL_VAL * (
+                    mobil_eval(b, &p, c, o0x88( 1,  1)) +
+                    mobil_eval(b, &p, c, o0x88(-1,  1)) +
+                    mobil_eval(b, &p, c, o0x88( 1, -1)) +
+                    mobil_eval(b, &p, c, o0x88(-1, -1)) +
+                    mobil_eval(b, &p, c, o0x88( 1,  0)) +
+                    mobil_eval(b, &p, c, o0x88(-1,  0)) +
+                    mobil_eval(b, &p, c, o0x88( 0,  1)) +
+                    mobil_eval(b, &p, c, o0x88( 0, -1))
+                ),
+                _ => 0,
+            };
+            // let mobility_score = 0;
             let p_score = match p.piece_type {
                 PieceType::None => 0,
                 PieceType::Pawn => PAWN_VAL + pst::PAWN[lookup_c],
