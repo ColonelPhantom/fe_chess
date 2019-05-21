@@ -3,6 +3,7 @@ use board::Board;
 
 mod alphabeta;
 mod quiesce;
+mod see;
 pub mod transtable;
 
 #[derive(Debug, Clone, Copy)]
