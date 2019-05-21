@@ -99,6 +99,15 @@ impl std::fmt::Display for Score {
     }
 }
 
+impl Score {
+    pub fn is_decided(&self) -> bool {
+        match self {
+            Score::Value(_v) => false,
+            _ => true,
+        }
+    }
+}
+
 
 
 #[derive(Debug, Clone)]

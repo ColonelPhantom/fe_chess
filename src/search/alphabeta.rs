@@ -31,6 +31,15 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                         Some(m) => vec![m],
                     }
                 }
+            } else if tt_entry.eval_score.is_decided() {
+                println!("Hit on decided position");
+                return SearchInfo {
+                    score: tt_entry.eval_score,
+                    pv: match tt_entry.get_move() {
+                        None => vec![],
+                        Some(m) => vec![m],
+                    }
+                }
             } else if tt_entry.get_move().is_some() {
                 // Ttable entry too shallow, use it only for move ordering
                 //println!("Partial table hit!");
