@@ -5,6 +5,15 @@ mod movegen;
 mod search;
 mod ui;
 
+#[macro_export]
+macro_rules! measure_time {
+    ($op:expr, $message:expr) => {
+        let start = std::time::Instant::now();
+        $op;
+        println!($message, start.elapsed().as_millis());
+    };
+}
+
 fn main() {
 
     let arg = std::env::args().nth(1);

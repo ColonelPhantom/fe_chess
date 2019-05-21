@@ -24,17 +24,10 @@ pub fn main() {
     // }
     // println!("Score: {}", searchinfo.score);
 
-    let start = std::time::Instant::now();
-    search::search(&mut b, 4, &mut search::transtable::TransTable::new(24));
-    println!("Time to depth 4: {} ms", start.elapsed().as_millis());
-    let start = std::time::Instant::now();
-    search::search(&mut b, 5, &mut search::transtable::TransTable::new(24));
-    println!("Time to depth 5: {} ms", start.elapsed().as_millis());
-    let start = std::time::Instant::now();
-    search::search(&mut b, 6, &mut search::transtable::TransTable::new(24));
-    println!("Time to depth 6: {} ms", start.elapsed().as_millis());
-    search::search(&mut b, 7, &mut search::transtable::TransTable::new(24));
-    println!("Time to depth 7: {} ms", start.elapsed().as_millis());
+    measure_time!(search::search(&mut b, 4, &mut search::transtable::TransTable::new(24)), "Time to depth 4: {} ms");
+    measure_time!(search::search(&mut b, 5, &mut search::transtable::TransTable::new(24)), "Time to depth 5: {} ms");
+    measure_time!(search::search(&mut b, 6, &mut search::transtable::TransTable::new(24)), "Time to depth 6: {} ms");
+    measure_time!(search::search(&mut b, 7, &mut search::transtable::TransTable::new(24)), "Time to depth 7: {} ms");
     
 
     // println!("Sizeof board: {}", std::mem::size_of::<board::Board>());
