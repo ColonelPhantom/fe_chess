@@ -16,6 +16,8 @@ pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32
         }
     };
 
+    // TODO: make see consider pawn promotion
+
     b.make(&board::Move::new(lva, sq));
     let value = std::cmp::max(0, crate::eval::piece_val(b[sq].piece_type) - see(b, sq, !side));
     b.unmake();
