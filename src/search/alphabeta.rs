@@ -20,7 +20,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     }
 
     match tt.get(b.zobrist) {
-        None => (),
+        None => {},
         Some(tt_entry) => {
             if tt_entry.depthleft >= depthleft as u16 {
                 //println!("Full table hit!");
@@ -32,7 +32,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     }
                 }
             } else if tt_entry.eval_score.is_decided() {
-                println!("Hit on decided position");
+                //println!("Hit on decided position");
                 return SearchInfo {
                     score: tt_entry.eval_score,
                     pv: match tt_entry.get_move() {
@@ -64,6 +64,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     pv = si.pv;
                     pv.push(m);
                 }
+            } else {
+                // No use for TT entry
+                //println!("Useless TT entry with depth difference {}, alpha {} and beta {}: {:?}", depthleft as u16 - tt_entry.depthleft, alpha, beta, tt_entry);
             }
         }
     }
@@ -109,8 +112,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             };
         }
         if score > alpha  {
-            // Store self move in TT, next move is the best move.
-            //println!("Alpha raised");
+            // Remember this move to be stored in TT
             best_move = Some(m.clone());
             alpha = score;
             pv = si.pv;
