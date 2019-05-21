@@ -22,5 +22,12 @@ pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32
 
     return value;
 }
+
+pub fn see_capt(b: &mut board::Board, m: &board::Move, side: board::Side) -> i32 {
+    let captured = crate::eval::piece_val(b[m.to].piece_type);
+    b.make(m);
+    let value = captured - see(b, m.to, !side);
+    b.unmake();
     return value;
+
 }
