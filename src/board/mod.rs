@@ -55,15 +55,15 @@ pub fn coord8x8_to0x88(sq8x8: Coord8x8) -> Coord0x88 {
 #[derive(Clone, Debug, PartialEq)]
 pub enum ThreatInfo {
     Safe,
-    Single { c: Coord0x88 },
-    Multiple { c: Vec<Coord0x88> },
+    Single (Coord0x88),
+    Multiple (Vec<Coord0x88>),
 }
 impl ThreatInfo {
     pub fn is_safe(&self) -> bool {
         match self {
             ThreatInfo::Safe => true,
-            ThreatInfo::Single{c: _} => false,
-            ThreatInfo::Multiple{c: _} => false,
+            ThreatInfo::Single(_c) => false,
+            ThreatInfo::Multiple(_c) => false,
         }
     }
 }
@@ -606,8 +606,8 @@ impl Board {
 
         match threats.len() {
             0 => ThreatInfo::Safe,
-            1 => ThreatInfo::Single{ c: threats[0] },
-            _ => ThreatInfo::Multiple { c: threats },
+            1 => ThreatInfo::Single( threats[0] ),
+            _ => ThreatInfo::Multiple ( threats ),
         }
 
     }

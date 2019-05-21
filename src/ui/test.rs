@@ -33,8 +33,8 @@ pub fn main() {
     let start = std::time::Instant::now();
     search::search(&mut b, 6, &mut search::transtable::TransTable::new(24));
     println!("Time to depth 6: {} ms", start.elapsed().as_millis());
-    // search::search(&mut b, 7, &mut search::transtable::TransTable::new(24));
-    // println!("Time to depth 7: {} ms", start.elapsed().as_millis());
+    search::search(&mut b, 7, &mut search::transtable::TransTable::new(24));
+    println!("Time to depth 7: {} ms", start.elapsed().as_millis());
     
 
     // println!("Sizeof board: {}", std::mem::size_of::<board::Board>());

@@ -29,6 +29,17 @@ fn mobil_eval(b: &Board, p: &Piece, from: Coord0x88, offset: Coord0x88) -> ValCp
     return count;
 }
 
+pub fn piece_val(p: PieceType) -> ValCp {
+    match p {
+        PieceType::Pawn => PAWN_VAL,
+        PieceType::Knight => KNIGHT_VAL,
+        PieceType::Bishop => BISHOP_VAL,
+        PieceType::Rook => ROOK_VAL,
+        PieceType::Queen => QUEEN_VAL,
+        PieceType::King => KING_VAL,
+        _ => 0,
+    }
+}
 pub fn eval(b: &mut Board) -> i32 {
     let mut score: i32 = 0;
     let b_sign = match b.side_to_move {
