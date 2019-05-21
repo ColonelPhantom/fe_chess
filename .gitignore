@@ -1,6 +1,9 @@
 /target
 **/*.rs.bk
 
+# Own directory with binaries
+/bin
+
 # Perf and callgrind
 perf.data
 perf.data.old
