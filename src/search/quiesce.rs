@@ -23,12 +23,20 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score ) -> Score {
     if alpha < stand_pat  {
         alpha = stand_pat;
     }
-    if let Score::Value(a) = alpha {
-        if sp < a - MAX_DELTA {
-            //println!("Delta pruned");
+
+    // Delta pruning
+    match alpha {
+        Score::Value(a) => if sp < a - MAX_DELTA {
+            return alpha;
+        },
+        Score::Draw => if sp < 0 - MAX_DELTA {
             return alpha;
         }
-    }
+        Score::Win(_d) => {return stand_pat;},
+        Score::Loss(_d) => {}
+    };
+
+    
 
     let cap_moves = movegen::capturegen::cap_gen(b);
     for m in cap_moves {
