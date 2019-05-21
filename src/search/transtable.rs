@@ -19,7 +19,7 @@ fn compress_en_passant(ep: &board::EnPassantState) -> u8 {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct MoveCompact {
     from: u8,
     to: u8,
@@ -57,7 +57,7 @@ impl MoveCompact {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct TtEntry {
     pub full_zobrist: u64,
     first_move: Option<MoveCompact>,
