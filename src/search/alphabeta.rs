@@ -22,7 +22,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     match tt.get(b.zobrist) {
         None => {},
         Some(tt_entry) => {
-            if tt_entry.depthleft >= depthleft as u16 {
+            if tt_entry.depthleft >= depthleft as i16 {
                 //println!("Full table hit!");
                 return SearchInfo{
                     score: tt_entry.eval_score,
@@ -104,7 +104,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         b.unmake();
         if score >= beta  {
             // Store self move in TT, move field is refutation move
-            tt.put(b.zobrist, Some(m), depthleft as u16, score);
+            tt.put(b.zobrist, Some(m), depthleft as i16, score);
             //println!("Beta cutoff");
             return SearchInfo {
                 score: beta,
@@ -119,7 +119,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             pv.push(m.clone());
         }
     }
-    tt.put(b.zobrist, best_move, depthleft as u16, alpha);
+    tt.put(b.zobrist, best_move, depthleft as i16, alpha);
     //if best_move.is_none() { println!("No alpha raise") }
     return SearchInfo {
         score: alpha,

@@ -61,7 +61,7 @@ impl MoveCompact {
 pub struct TtEntry {
     pub full_zobrist: u64,
     first_move: Option<MoveCompact>,
-    pub depthleft: u16,
+    pub depthleft: i16,
     pub eval_score: search::Score,
 }
 impl Default for TtEntry {
@@ -96,7 +96,7 @@ impl TransTable {
         Self {t, len: len as u64 - 1}
     }
 
-    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: u16, score: search::Score) {
+    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score) {
         let key = zob & self.len;
         self.t[key as usize] = TtEntry {
             full_zobrist: zob,
