@@ -6,7 +6,7 @@ pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32
     let mut att = b.under_attack(sq, !side);    // Who of us can attack the opponent in sq?
     // Get the least valuable attacker
     let lva = match att {
-        board::ThreatInfo::Safe => {return value;}, 
+        board::ThreatInfo::Safe => {return 0;}, 
         board::ThreatInfo::Single(a) => a,
         board::ThreatInfo::Multiple(mut va) => {
             va.sort_unstable_by(|c1,c2| {
