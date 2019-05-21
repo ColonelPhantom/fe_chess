@@ -2,19 +2,25 @@ use crate::movegen;
 use crate::board;
 use board::Board;
 
-pub fn see(b: &board::Board, sq: board::Coord0x88, side: board::Side) -> isize {
-    let mut value = 0;
-    let mut att = b.under_attack(sq, !side);    // Are we attacking the opponent in sq?
+pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32 {
+    let mut att = b.under_attack(sq, !side);    // Who of us can attack the opponent in sq?
+    // Get the least valuable attacker
     let lva = match att {
         board::ThreatInfo::Safe => {return value;}, 
         board::ThreatInfo::Single(a) => a,
         board::ThreatInfo::Multiple(mut va) => {
             va.sort_unstable_by(|c1,c2| {
-                (b[*c1].piece_type as usize).cmp( &(b[*c2].piece_type as usize ))
+                crate::eval::piece_val(b[*c1].piece_type).cmp(&crate::eval::piece_val(b[*c2].piece_type))
             });
             *va.first().unwrap()
         }
     };
 
+    b.make(&board::Move::new(lva, sq));
+    let value = std::cmp::max(0, crate::eval::piece_val(b[sq].piece_type) - see(b, sq, !side));
+    b.unmake();
+
+    return value;
+}
     return value;
 }
