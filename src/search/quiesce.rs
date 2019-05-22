@@ -28,6 +28,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         None => {},
         Some(tt_entry) => {
             // TODO: maybe TT move ordering?
+            // Always return the stored score: depth in quiesce does not matter
             return tt_entry.eval_score;
         }
     };

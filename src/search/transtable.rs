@@ -100,17 +100,12 @@ impl TransTable {
 
     fn put_actual(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, key: u64) -> PutState {
         let e = &self.t[key as usize];
-        if zob == e.full_zobrist {
-            // The stored position is the same position
-            if e.depthleft >= depth {
-                // If the stored entry is better than or as good as the new entry, do not store it.
+        if e.depthleft >= depth {
+            // Occupied by better entry: abort/skip
+            if zob == e.full_zobrist {
+                // Better version of self, do not retry elsewhere in the table.
                 return PutState::Abort;
-            }
-            // Will now go to "No objections"
-        } else if e.full_zobrist != 0 { // Entry is occupied
-            // Check if the position stored is remember-worthy
-            if depth < e.depthleft {
-                // The stored position is more deeply searched.
+            } else {
                 return PutState::Occupied;
             }
         }
