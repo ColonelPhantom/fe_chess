@@ -13,8 +13,13 @@ It can also be ran with `cargo run --release` or the binaries on the Releases pa
 fe_chess currently only has a simple built-in shell that is not compatible with uci. Type `help` to get a list of command. (UCI not functional).
 
 # Changelog
-## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.2...master)
+## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.3...master)
+## [v0.2.3](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.2...v0.2.3)
 * Make search use table hits of which the outcome is decided (Win, Draw, Loss)
+* Remove previous PV from search
+* Do not double search at depth 1 in the iterative deepening
+* Delta prune in quiescence when alpha is game-ending
+* Implement hashtable rehashing to improve performance under pressure
 ## [v0.2.2](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.1...v0.2.2)
 * Implement static exchange evaluation
     * Quiscence search does not consider a move with see < 0
