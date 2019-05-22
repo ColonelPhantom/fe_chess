@@ -108,8 +108,11 @@ impl TransTable {
             }
             // Will now go to "No objections"
         } else if e.full_zobrist != 0 { // Entry is occupied
-            // TODO: check if the position stored is remember-worthy
-            return PutState::Occupied;
+            // Check if the position stored is remember-worthy
+            if depth < e.depthleft {
+                // The stored position is more deeply searched.
+                return PutState::Occupied;
+            }
         }
 
         // No objections, so put the move in.
