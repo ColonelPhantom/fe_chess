@@ -252,7 +252,7 @@ impl Board {
     }
 
     pub fn to_fen(&self) -> &str {
-
+        return "";
     }
 
     pub fn make(&mut self, cmove: &Move) {
