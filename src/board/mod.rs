@@ -245,6 +245,16 @@ impl Board {
         return b;
     }
 
+    pub fn from_fen(fen: &str) -> Board {
+        let mut b = Board::new();
+
+        return b;
+    }
+
+    pub fn to_fen(&self) -> &str {
+
+    }
+
     pub fn make(&mut self, cmove: &Move) {
         // Begin with determining info on the move
         let captured: Piece = self[cmove.to];
