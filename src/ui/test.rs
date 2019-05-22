@@ -14,8 +14,8 @@ pub fn main() {
     b.make(m);
     let m = &search::search(&mut b, 5, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
     b.make(m);
-    let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
-    b.make(m);
+    // let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    // b.make(m);
 
     //super::print_board(&b);
 
@@ -30,9 +30,12 @@ pub fn main() {
 
     let mut tt = search::transtable::TransTable::new(22);
     // measure_time!(search::search(&mut b, 4, &mut tt), "Time to depth 4: {} ms");
-    // measure_time!(search::search(&mut b, 5, &mut tt), "Time to depth 5: {} ms");
+    measure_time!(search::search(&mut b, 5, &mut tt), "Time to depth 5: {} ms");
+    let mut tt = search::transtable::TransTable::new(22);
     measure_time!(search::search(&mut b, 6, &mut tt), "Time to depth 6: {} ms");
-    // measure_time!(search::search(&mut b, 7, &mut tt), "Time to depth 7: {} ms");
+    let mut tt = search::transtable::TransTable::new(22);
+    measure_time!(search::search(&mut b, 7, &mut tt), "Time to depth 7: {} ms");
+    println!("Transposition table pressure: {}/{}", tt.filled(), 2_u64.pow(22));
     
 
     // println!("Sizeof board: {}", std::mem::size_of::<board::Board>());
