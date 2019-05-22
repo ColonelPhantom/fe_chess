@@ -1,6 +1,8 @@
 use crate::board;
 use crate::search;
 
+const HASH_SHIFTS: [u64; 4] = [0, 26, 52, 14];
+
 fn expand_en_passant(ep: u8) -> board::EnPassantState {
     use board::EnPassantState::*;
     use std::num::Wrapping;
@@ -85,7 +87,7 @@ impl TtEntry {
 
 pub struct TransTable {
     t: Vec<TtEntry>,
-    pub len: u64
+    len: u64,
 }
 
 impl TransTable {
@@ -96,9 +98,18 @@ impl TransTable {
         Self {t, len: len as u64 - 1}
     }
 
-    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score) {
-        let key = zob & self.len;
-        if depth < self.t[key as usize].depthleft { return; }
+    fn put_actual(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, key: u64) -> PutState {
+        let e = &self.t[key as usize];
+        if zob == e.full_zobrist {
+            if depth < e.depthleft {
+                return PutState::Abort;
+            }
+        } else if e.full_zobrist != 0 { // Entry is occupied
+            // TODO: check if the position stored is remember-worthy
+            return PutState::Occupied;
+        }
+
+        // No objections, so put the move in.
         self.t[key as usize] = TtEntry {
             full_zobrist: zob,
             first_move: match m {
@@ -108,15 +119,40 @@ impl TransTable {
             depthleft: depth,
             eval_score: score,
         };
+        return PutState::Ok;
+    }
+    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score) {
+        for i in &HASH_SHIFTS {
+            let key = zob >> i;
+            match self.put_actual(zob, m, depth, score, key & self.len) {
+                PutState::Ok => { return },
+                PutState::Occupied => { continue },
+                PutState::Abort => { return },
+            }
+        }
     }
 
-    pub fn get(&self, zob: u64) -> Option<TtEntry> {
-        let e = self.t[(zob & self.len) as usize];
+    fn get_actual(&self, zob: u64, key: u64) -> GetState {
+        let e = self.t[key as usize];
         if e.full_zobrist == zob {
-            Some(e)
+            GetState::Ok(e)
+        } else if e.full_zobrist == 0 {
+            GetState::Abort
         } else {
-            None
+            GetState::Occupied
         }
+    }
+    pub fn get(&self, zob: u64) -> Option<TtEntry> {
+        for i in &HASH_SHIFTS {
+            let key = zob >> i;
+            match self.get_actual(zob, key & self.len) {
+                GetState::Ok(t) => { return Some(t); },
+                GetState::Occupied => { continue; },
+                GetState::Abort => { return None; },
+            };
+        };
+        // No entry found.
+        return None;
     }
 
     #[allow(dead_code)]
@@ -129,4 +165,16 @@ impl TransTable {
         }
         return c;
     }
+}
+
+enum PutState {
+    Ok,
+    Occupied,
+    Abort,
+}
+
+enum GetState {
+    Ok(TtEntry),
+    Occupied,
+    Abort,
 }
