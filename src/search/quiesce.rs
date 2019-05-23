@@ -9,21 +9,6 @@ const MAX_DELTA: i32 = 1000;
 const SEE_DELTA: i32 = 100;
 
 pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mut super::transtable::TransTable ) -> Score {
-     let sign = match b.side_to_move {
-        board::WHITE => 1,
-        board::BLACK => -1,
-    };
-    
-    let sp = sign * eval(b);
-    let stand_pat = Score::Value(sp);
-
-    if stand_pat >= beta  {
-        return beta;
-    }
-    if alpha < stand_pat  {
-        alpha = stand_pat;
-    }
-
     match tt.get(b.zobrist) {
         None => {},
         Some(tt_entry) => {
@@ -32,6 +17,23 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
             return tt_entry.eval_score;
         }
     };
+
+    let sign = match b.side_to_move {
+        board::WHITE => 1,
+        board::BLACK => -1,
+    };
+    
+    let sp = sign * eval(b);
+    let stand_pat = Score::Value(sp);
+
+    if stand_pat >= beta  {
+        tt.put(b.zobrist, None, -qdepth, stand_pat);
+        return beta;
+    }
+    if alpha < stand_pat  {
+        alpha = stand_pat;
+    }
+
 
     // Delta pruning
     match alpha {
