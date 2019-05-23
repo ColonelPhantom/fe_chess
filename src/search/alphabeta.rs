@@ -11,6 +11,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
  -> SearchInfo
 {
     let mut pv: Vec<board::Move> = vec![];
+    let mut best_move: Option<board::Move> = None;
 
     if depthleft == 0 {
         return SearchInfo{
@@ -60,6 +61,8 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     };
                 }
                 if score > alpha  {
+                    // Remember this move to be stored in TT
+                    best_move = Some(m.clone());
                     alpha = score;
                     pv = si.pv;
                     pv.push(m);
@@ -87,7 +90,6 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         }
     }
 
-    let mut best_move: Option<board::Move> = None;
     for m in moves {
         b.make(&m);
         if !b.is_check(!b.side_to_move).is_safe() {
