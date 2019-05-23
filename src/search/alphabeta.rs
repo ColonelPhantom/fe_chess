@@ -55,6 +55,8 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 };
                 b.unmake();
                 if score >= beta  {
+                    // Store self move in TT, move field is refutation move
+                    tt.put(b.zobrist, Some(m), depthleft as i16, score);
                     return SearchInfo {
                         score: beta,
                         pv
