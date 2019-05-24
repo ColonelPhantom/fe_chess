@@ -35,6 +35,8 @@ pub fn main() {
     measure_time!(search::search(&mut b, 6, &mut tt), "Time to depth 6: {} ms");
     let mut tt = search::transtable::TransTable::new(22);
     measure_time!(search::search(&mut b, 7, &mut tt), "Time to depth 7: {} ms");
+    // let mut tt = search::transtable::TransTable::new(22);
+    // measure_time!(search::search(&mut b, 8, &mut tt), "Time to depth 8: {} ms");
     println!("Transposition table pressure: {}/{}", tt.filled(), 2_u64.pow(22));
     
 
