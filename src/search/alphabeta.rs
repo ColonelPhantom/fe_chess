@@ -140,7 +140,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     };
 
     return SearchInfo {
-        score: alpha,
+        score: local_alpha,
         pv
     }
 }

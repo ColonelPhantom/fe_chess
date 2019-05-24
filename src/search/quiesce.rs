@@ -10,28 +10,44 @@ const MAX_DELTA: i32 = 1000;
 const SEE_DELTA: i32 = 100;
 
 pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mut super::transtable::TransTable ) -> Score {
+    let sp;
+    let stand_pat;
     match tt.get(b.zobrist) {
-        None => {},
-        Some(tt_entry) => {
-            // TODO: maybe TT move ordering?
-            // Always return the stored score: depth in quiesce does not matter
-            //return tt_entry.eval_score;
+        Some(tt_entry) if tt_entry.node_type == NodeType::AllNode && tt_entry.depthleft < 0 && tt_entry.eval_score >= beta => {
+            // stand_pat = tt_entry.eval_score;
+            // sp = match stand_pat {
+            //     Score::Value(v) => v,
+            //     Score::Draw => 0,
+            //     Score::Win(_d) => std::i32::MAX - 10,
+            //     Score::Loss(_d) => std::i32::MIN + 10,
+            // };
+            return tt_entry.eval_score;
         }
+        Some(tt_entry) if tt_entry.node_type == NodeType::CutNode && tt_entry.eval_score >= beta => {
+            return tt_entry.eval_score;
+        },
+        Some(tt_entry) if tt_entry.node_type == NodeType::PvNode && tt_entry.depthleft < 0 && tt_entry.eval_score >= beta => {
+            //println!("PvNode hit in quiesce; alpha {}; beta; {}; tt_entry.eval {}", alpha, beta, tt_entry.eval_score);
+            return tt_entry.eval_score;
+        },
+        _ => {
+            let sign = match b.side_to_move {
+                board::WHITE => 1,
+                board::BLACK => -1,
+            };
+            
+            sp = sign * eval(b);
+            stand_pat = Score::Value(sp);
+        },
+
     };
 
-    let sign = match b.side_to_move {
-        board::WHITE => 1,
-        board::BLACK => -1,
-    };
-    
-    let sp = sign * eval(b);
-    let stand_pat = Score::Value(sp);
     
     let mut local_alpha = stand_pat;
     let mut local_alpha_move = None;
 
     if stand_pat >= beta  {
-        //tt.put(b.zobrist, None, -qdepth, beta);
+        tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::CutNode);
         return beta;
     }
     if alpha < stand_pat  {
@@ -90,6 +106,14 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         }
     }
     //println!("End of quiescence. Alpha: {}; local_alpha: {}, stand_pat {}", alpha, local_alpha, stand_pat);
-    tt.put(b.zobrist, local_alpha_move, -qdepth, local_alpha, NodeType::AllNode);
+    
+    match !(local_alpha < alpha) {  // match alpha_raised
+        false => tt.put(b.zobrist, local_alpha_move, -qdepth, local_alpha, NodeType::AllNode),
+        true => {
+            //println!("TtPut PvNode; alpha {}, local_alpha {}", alpha, local_alpha);
+            tt.put(b.zobrist, local_alpha_move, -qdepth, local_alpha, NodeType::PvNode);
+        },
+    };
+
     return alpha;
 }
