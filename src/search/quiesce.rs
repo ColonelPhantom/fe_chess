@@ -77,8 +77,8 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
             return beta;
         }
         if score > alpha  {
-           alpha = score;
-           local_alpha = score;
+            alpha = score;
+            local_alpha = score;
         }
     }
     //println!("End of quiescence. Alpha: {}; local_alpha: {}, stand_pat {}", alpha, local_alpha, stand_pat);
