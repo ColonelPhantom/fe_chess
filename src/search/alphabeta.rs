@@ -12,6 +12,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
  -> SearchInfo
 {
     let mut pv: Vec<board::Move> = vec![];
+    let mut local_alpha = Score::Loss(0);
     let mut best_move: Option<board::Move> = None;
 
     if depthleft == 0 {
@@ -67,8 +68,12 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     // Remember this move to be stored in TT
                     best_move = Some(m.clone());
                     alpha = score;
+                    local_alpha = score;
                     pv = si.pv;
                     pv.push(m);
+                } else if score > local_alpha { // Local_alpha <= alpha so if first is true second is true as well.
+                    best_move = Some(m.clone());
+                    local_alpha = score;
                 }
             } else {
                 // No use for TT entry
@@ -120,15 +125,20 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             // Remember this move to be stored in TT
             best_move = Some(m.clone());
             alpha = score;
+            local_alpha = score;
             pv = si.pv;
             pv.push(m.clone());
+        } else if score > local_alpha {
+            best_move = Some(m.clone());
+            local_alpha = score;
         }
     }
 
-    match best_move {
-        None => tt.put(b.zobrist, best_move, depthleft as i16, alpha, NodeType::AllNode),
-        Some(_m) => tt.put(b.zobrist, best_move, depthleft as i16, alpha, NodeType::PvNode),
+    match local_alpha < alpha {
+        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode),
+        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode),
     };
+
     return SearchInfo {
         score: alpha,
         pv

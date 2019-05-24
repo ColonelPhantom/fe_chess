@@ -78,12 +78,15 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
             tt.put(b.zobrist, Some(m), -qdepth, score, NodeType::CutNode);
             return beta;
         }
+        
         if score > alpha  {
             alpha = score;
-        }
-        if score > local_alpha {
             local_alpha = score;
             local_alpha_move = Some(m);
+        } else if score > local_alpha {
+            local_alpha = score;
+            local_alpha_move = Some(m);
+
         }
     }
     //println!("End of quiescence. Alpha: {}; local_alpha: {}, stand_pat {}", alpha, local_alpha, stand_pat);
