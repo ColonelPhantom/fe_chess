@@ -65,6 +65,7 @@ pub struct TtEntry {
     first_move: Option<MoveCompact>,
     pub depthleft: i16,
     pub eval_score: search::Score,
+    pub node_type: search::NodeType,
 }
 impl Default for TtEntry {
     fn default() -> Self {
@@ -72,7 +73,8 @@ impl Default for TtEntry {
             full_zobrist: 0,
             first_move: None,
             depthleft: std::i16::MIN,
-            eval_score: search::Score::Draw
+            eval_score: search::Score::Draw,
+            node_type: search::NodeType::None,
         }
     }
 } 
@@ -98,7 +100,7 @@ impl TransTable {
         Self {t, len: len as u64 - 1}
     }
 
-    fn put_actual(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, key: u64) -> PutState {
+    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) -> PutState {
         let e = &self.t[key as usize];
         if e.depthleft >= depth {
             // Occupied by better entry: abort/skip
@@ -119,13 +121,14 @@ impl TransTable {
             },
             depthleft: depth,
             eval_score: score,
+            node_type,
         };
         return PutState::Ok;
     }
-    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score) {
+    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
-            match self.put_actual(zob, m, depth, score, key & self.len) {
+            match self.put_actual(zob, key & self.len, m, depth, score, node_type) {
                 PutState::Ok => { return },
                 PutState::Occupied => { continue },
                 PutState::Abort => { return },

@@ -4,6 +4,7 @@ use crate::board;
 use board::Board;
 
 use super::Score;
+use super::NodeType;
 
 const MAX_DELTA: i32 = 1000;
 const SEE_DELTA: i32 = 100;
@@ -27,6 +28,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
     let stand_pat = Score::Value(sp);
     
     let mut local_alpha = stand_pat;
+    let mut local_alpha_move = None;
 
     if stand_pat >= beta  {
         //tt.put(b.zobrist, None, -qdepth, beta);
@@ -73,15 +75,18 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         b.unmake();
 
         if score >= beta  {
-            tt.put(b.zobrist, Some(m), -qdepth, score);
+            tt.put(b.zobrist, Some(m), -qdepth, score, NodeType::CutNode);
             return beta;
         }
         if score > alpha  {
             alpha = score;
+        }
+        if score > local_alpha {
             local_alpha = score;
+            local_alpha_move = Some(m);
         }
     }
     //println!("End of quiescence. Alpha: {}; local_alpha: {}, stand_pat {}", alpha, local_alpha, stand_pat);
-    //tt.put(b.zobrist, None, -qdepth, local_alpha);
+    tt.put(b.zobrist, local_alpha_move, -qdepth, local_alpha, NodeType::AllNode);
     return alpha;
 }

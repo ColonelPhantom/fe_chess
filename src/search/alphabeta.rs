@@ -6,6 +6,7 @@ use super::quiesce::quiesce;
 use super::SearchInfo;
 use super::Score;
 use super::transtable::TransTable;
+use super::NodeType;
 
 pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
  -> SearchInfo
@@ -56,7 +57,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 b.unmake();
                 if score >= beta  {
                     // Store self move in TT, move field is refutation move
-                    tt.put(b.zobrist, Some(m), depthleft as i16, score);
+                    tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode);
                     return SearchInfo {
                         score: beta,
                         pv
@@ -108,7 +109,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         b.unmake();
         if score >= beta  {
             // Store self move in TT, move field is refutation move
-            tt.put(b.zobrist, Some(m), depthleft as i16, score);
+            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode);
             //println!("Beta cutoff");
             return SearchInfo {
                 score: beta,
@@ -123,8 +124,11 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             pv.push(m.clone());
         }
     }
-    tt.put(b.zobrist, best_move, depthleft as i16, alpha);
-    //if best_move.is_none() { println!("No alpha raise") }
+
+    match best_move {
+        None => tt.put(b.zobrist, best_move, depthleft as i16, alpha, NodeType::AllNode),
+        Some(_m) => tt.put(b.zobrist, best_move, depthleft as i16, alpha, NodeType::PvNode),
+    };
     return SearchInfo {
         score: alpha,
         pv

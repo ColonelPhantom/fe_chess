@@ -108,7 +108,13 @@ impl Score {
     }
 }
 
-
+#[derive(Copy, Clone, Debug)]
+pub enum NodeType {
+    PvNode,     // TT: Score is exact
+    AllNode,    // All-Node: Score is exact (local_alpha)
+    CutNode,    // Cut-Node: Score is lower bound (might be higher)
+    None
+}
 
 #[derive(Debug, Clone)]
 pub struct SearchInfo {
