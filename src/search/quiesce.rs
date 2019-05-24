@@ -14,7 +14,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         Some(tt_entry) => {
             // TODO: maybe TT move ordering?
             // Always return the stored score: depth in quiesce does not matter
-            return tt_entry.eval_score;
+            //return tt_entry.eval_score;
         }
     };
 
@@ -25,9 +25,11 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
     
     let sp = sign * eval(b);
     let stand_pat = Score::Value(sp);
+    
+    let mut local_alpha = stand_pat;
 
     if stand_pat >= beta  {
-        tt.put(b.zobrist, None, -qdepth, stand_pat);
+        //tt.put(b.zobrist, None, -qdepth, beta);
         return beta;
     }
     if alpha < stand_pat  {
@@ -76,8 +78,10 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         }
         if score > alpha  {
            alpha = score;
+           local_alpha = score;
         }
     }
-    tt.put(b.zobrist, None, -qdepth, alpha);
+    //println!("End of quiescence. Alpha: {}; local_alpha: {}, stand_pat {}", alpha, local_alpha, stand_pat);
+    //tt.put(b.zobrist, None, -qdepth, local_alpha);
     return alpha;
 }
