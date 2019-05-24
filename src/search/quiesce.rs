@@ -9,27 +9,17 @@ const MAX_DELTA: i32 = 1000;
 const SEE_DELTA: i32 = 100;
 
 pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mut super::transtable::TransTable ) -> Score {
-    match tt.get(b.zobrist) {
-        None => {},
-        Some(tt_entry) => {
-            // TODO: maybe TT move ordering?
-            // Always return the stored score: depth in quiesce does not matter
-            //return tt_entry.eval_score;
-        }
-    };
-
+    let sp;
+    let stand_pat;
     let sign = match b.side_to_move {
         board::WHITE => 1,
         board::BLACK => -1,
     };
     
-    let sp = sign * eval(b);
-    let stand_pat = Score::Value(sp);
-    
-    let mut local_alpha = stand_pat;
+    sp = sign * eval(b);
+    stand_pat = Score::Value(sp);
 
     if stand_pat >= beta  {
-        //tt.put(b.zobrist, None, -qdepth, beta);
         return beta;
     }
     if alpha < stand_pat  {
@@ -73,15 +63,13 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         b.unmake();
 
         if score >= beta  {
-            tt.put(b.zobrist, Some(m), -qdepth, score);
             return beta;
         }
+        
         if score > alpha  {
             alpha = score;
-            local_alpha = score;
         }
     }
-    //println!("End of quiescence. Alpha: {}; local_alpha: {}, stand_pat {}", alpha, local_alpha, stand_pat);
-    //tt.put(b.zobrist, None, -qdepth, local_alpha);
+    
     return alpha;
 }
