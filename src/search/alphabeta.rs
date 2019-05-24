@@ -134,9 +134,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         }
     }
 
-    match local_alpha < alpha {
-        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode),
+    match !(local_alpha < alpha) {  // match alpha_raised
         false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode),
+        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode),
     };
 
     return SearchInfo {
