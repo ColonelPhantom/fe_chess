@@ -100,8 +100,11 @@ impl TransTable {
         Self {t, len: len as u64 - 1}
     }
 
-    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) -> PutState {
-        let e = &self.t[key as usize];
+    fn should_overwrite(&mut self, zob: u64, e: &TtEntry, m: Option<board::Move>, depth: i16, node_type: search::NodeType) -> PutState {
+        if e.depthleft < 0 {
+            // Always overwrite quiesce entries
+            return PutState::Ok;
+        }
         if e.depthleft >= depth {
             // Occupied by better entry: abort/skip
             if zob == e.full_zobrist {
@@ -111,19 +114,31 @@ impl TransTable {
                 return PutState::Occupied;
             }
         }
+        return PutState::Ok;
+
+
+    }
+    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) -> PutState {
+        let e = self.t[key as usize];
+        let action = self.should_overwrite(zob, &e, m, depth, node_type);
+        match action {
+            PutState::Ok => {
+                self.t[key as usize] = TtEntry {
+                    full_zobrist: zob,
+                    first_move: match m {
+                        None => None,
+                        Some(m) => Some(MoveCompact::from_move(m)),
+                    },
+                    depthleft: depth,
+                    eval_score: score,
+                    node_type,
+                };
+            }
+            _ => {}
+        }
+        return action;
 
         // No objections, so put the move in.
-        self.t[key as usize] = TtEntry {
-            full_zobrist: zob,
-            first_move: match m {
-                None => None,
-                Some(m) => Some(MoveCompact::from_move(m)),
-            },
-            depthleft: depth,
-            eval_score: score,
-            node_type,
-        };
-        return PutState::Ok;
     }
     pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) {
         for i in &HASH_SHIFTS {
