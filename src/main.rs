@@ -1,10 +1,3 @@
-#[macro_use]
-mod board;
-mod eval;
-mod movegen;
-mod search;
-mod ui;
-
 #[macro_export]
 macro_rules! measure_time {
     ($op:expr, $message:expr) => {
@@ -13,6 +6,16 @@ macro_rules! measure_time {
         println!($message, start.elapsed().as_millis());
     };
 }
+
+
+#[macro_use]
+mod board;
+mod eval;
+mod movegen;
+#[macro_use]
+mod search;
+mod ui;
+
 
 fn main() {
 
