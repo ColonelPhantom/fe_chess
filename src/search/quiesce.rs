@@ -4,6 +4,7 @@ use crate::board;
 use board::Board;
 
 use super::Score;
+use super::NodeType;
 
 const MAX_DELTA: i32 = 1000;
 const SEE_DELTA: i32 = 100;
@@ -16,8 +17,34 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         board::BLACK => -1,
     };
     
-    sp = sign * eval(b);
-    stand_pat = Score::Value(sp);
+    match tt.get(b.zobrist) {
+        None => {
+            sp = sign * eval(b);
+            stand_pat = Score::Value(sp);
+            tt.put(b.zobrist, None, -qdepth, stand_pat, super::NodeType::QuiesceEval);
+        }
+        Some(tt_entry) => match tt_entry.node_type {
+            NodeType::QuiesceEval | NodeType::PvNode | NodeType::AllNode => {
+                stand_pat = tt_entry.eval_score;
+                sp = match stand_pat {
+                    Score::Value(v) => v,
+                    Score::Draw => 0,
+                    Score::Win(d) => std::i32::MAX - 1 - d as i32,
+                    Score::Loss(d) => std::i32::MIN + 1 + d as i32,
+                }
+            }
+            NodeType::QuiesceCut | NodeType::CutNode => {
+                if tt_entry.eval_score >= beta {
+                    return beta;
+                }
+                sp = sign * eval(b);
+                stand_pat = Score::Value(sp);
+            }
+            NodeType::None => panic!("Tt.get returned some but type is None"),
+        }
+
+
+    }
 
     if stand_pat >= beta  {
         return beta;
@@ -63,6 +90,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         b.unmake();
 
         if score >= beta  {
+            tt.put(b.zobrist, Some(m), -qdepth, score, super::NodeType::QuiesceCut);
             return beta;
         }
         

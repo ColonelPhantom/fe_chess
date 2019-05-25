@@ -113,7 +113,10 @@ pub enum NodeType {
     PvNode,     // TT: Score is exact
     AllNode,    // All-Node: Score is exact (local_alpha)
     CutNode,    // Cut-Node: Score is lower bound (might be higher)
-    None
+    None,
+
+    QuiesceEval,
+    QuiesceCut, // Score might be higher
 }
 
 #[derive(Debug, Clone)]
