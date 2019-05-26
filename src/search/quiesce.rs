@@ -66,7 +66,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         Score::Loss(_d) => {}
     };
 
-    
+    let mut local_alpha = stand_pat;
 
     let cap_moves = movegen::capturegen::cap_gen(b);
     for m in cap_moves {
@@ -97,7 +97,11 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         if score > alpha  {
             alpha = score;
         }
+        if score > local_alpha {
+            local_alpha = score;
+        } else {
+        }
     }
     
-    return alpha;
+    return local_alpha;
 }
