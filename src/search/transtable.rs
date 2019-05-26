@@ -152,7 +152,7 @@ impl TransTable {
     }
 
     fn get_actual(&self, zob: u64, key: u64) -> GetState {
-        let e = self.t[key as usize];
+        let e = &self.t[key as usize];
         if e.full_zobrist == zob {
             GetState::Ok(e)
         } else if e.full_zobrist == 0 {
@@ -161,7 +161,7 @@ impl TransTable {
             GetState::Occupied
         }
     }
-    pub fn get(&self, zob: u64) -> Option<TtEntry> {
+    pub fn get(&self, zob: u64) -> Option<&TtEntry> {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
             match self.get_actual(zob, key & self.len) {
@@ -177,7 +177,7 @@ impl TransTable {
     #[allow(dead_code)]
     pub fn filled(&self) -> usize {
         let mut c = 0;
-        for i in 0..self.len {
+        for i in 0..=self.len {
             if self.t[i as usize].full_zobrist != 0 {
                 c += 1;
             }
@@ -192,8 +192,8 @@ enum PutState {
     Abort,
 }
 
-enum GetState {
-    Ok(TtEntry),
+enum GetState<'g> {
+    Ok(&'g TtEntry),
     Occupied,
     Abort,
 }
