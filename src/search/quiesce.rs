@@ -82,12 +82,12 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         let see = super::see::see_capt(b, &m, b.side_to_move);
         if see < 0 {
             //println!("SEE cut");
-            continue;
+            break;
         }
         if let Score::Value(a) = alpha {
             if sp + see < a - SEE_DELTA {
                 //println!("SEE delta prune");
-                continue;
+                break;
             }
         }
         b.make(&m);
