@@ -82,7 +82,11 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         }
     }
     
-    let moves = movegen::movegen(b);
+    let mut moves = movegen::movegen(b);
+
+    moves.sort_by_cached_key(|m| {
+        -super::see::see_capt(b, m, b.side_to_move)
+    });
 
     if moves.len() == 0 {
         if !b.is_check(b.side_to_move).is_safe() {
