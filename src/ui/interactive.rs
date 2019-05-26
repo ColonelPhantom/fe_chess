@@ -13,7 +13,7 @@ pub fn main() {
     let s = State {
         thought: None,
         board: board::Board::new(),
-        depth: 5,
+        depth: 6,
         transtable: search::transtable::TransTable::new(24) // 384 MiB
     };
     let mut shell = shrust::Shell::new( s );
