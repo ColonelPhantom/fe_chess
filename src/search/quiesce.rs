@@ -70,11 +70,15 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
 
     let mut local_alpha = stand_pat;
 
-    let cap_moves = movegen::capturegen::cap_gen(b);
+    let mut cap_moves = movegen::capturegen::cap_gen(b);
     if cap_moves.len() == 0 {
         tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull);
     }
+    cap_moves.sort_by_cached_key(|m| {
+        -super::see::see_capt(b, &m, b.side_to_move)
+    });
     for m in cap_moves {
+        // TODO: reuse the value used for sorting
         let see = super::see::see_capt(b, &m, b.side_to_move);
         if see < 0 {
             //println!("SEE cut");
