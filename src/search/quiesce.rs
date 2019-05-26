@@ -40,10 +40,12 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
                 sp = sign * eval(b);
                 stand_pat = Score::Value(sp);
             }
+            NodeType::QuiesceFull => {
+               return tt_entry.eval_score;
+
+            }
             NodeType::None => panic!("Tt.get returned some but type is None"),
         }
-
-
     }
 
     if stand_pat >= beta  {
@@ -102,6 +104,6 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         } else {
         }
     }
-    
+
     return local_alpha;
 }

@@ -117,6 +117,7 @@ pub enum NodeType {
 
     QuiesceEval,
     QuiesceCut, // Score might be higher
+    QuiesceFull,    // Return this score immediately
 }
 
 #[derive(Debug, Clone)]
