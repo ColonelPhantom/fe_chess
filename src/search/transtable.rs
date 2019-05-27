@@ -100,7 +100,7 @@ impl TransTable {
         Self {t, len: len as u64 - 1}
     }
 
-    fn should_overwrite(&mut self, zob: u64, e: &TtEntry, m: Option<board::Move>, depth: i16, node_type: search::NodeType) -> PutState {
+    fn should_overwrite(&mut self, zob: u64, e: &TtEntry, _m: Option<board::Move>, depth: i16, _node_type: search::NodeType) -> PutState {
         if e.depthleft < 0 {
             // Always overwrite quiesce entries
             return PutState::Ok;
