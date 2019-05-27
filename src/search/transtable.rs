@@ -184,6 +184,11 @@ impl TransTable {
         }
         return c;
     }
+
+    pub fn get_pv(&self, b: &mut board::Board) -> Vec<board::Move> {
+        // TODO: get PV from TT
+        return vec![self.get(b.zobrist).expect("No TT entry for root!").get_move().expect("No best move in TT root entry")];
+    }
 }
 
 enum PutState {

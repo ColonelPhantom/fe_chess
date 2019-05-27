@@ -125,15 +125,29 @@ pub enum NodeType {
 pub struct SearchInfo {
     pub score: Score,
     pub pv: Vec<board::Move>,
+    pub nodes: u64,
+}
+
+#[derive(Debug,Clone)]
+pub struct SearchInfoIntm {
+    pub score: Score,
+    pub nodes: u64,
 }
 
 pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo
 {
     let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, tt);
+    let mut nodes = si.nodes;
     for d in 2..=depth {
         si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, tt);
+        nodes += si.nodes;
     }
     // let si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
     //println!("Transtable filled with {} entries (capacity {})", tt.filled(), tt.len);
-    return si;
+    println!("Node count {}", nodes);
+    return SearchInfo {
+        score: si.score,
+        pv: tt.get_pv(b),
+        nodes: nodes,
+    };
 }

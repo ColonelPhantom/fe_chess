@@ -3,22 +3,22 @@ use crate::board;
 use board::Board;
 
 use super::quiesce::quiesce;
-use super::SearchInfo;
+use super::SearchInfoIntm;
 use super::Score;
 use super::transtable::TransTable;
 use super::NodeType;
 
 pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
- -> SearchInfo
+ -> SearchInfoIntm
 {
-    let mut pv: Vec<board::Move> = vec![];
     let mut local_alpha = Score::Loss(0);
     let mut best_move: Option<board::Move> = None;
+    let mut nodes = 1;
 
     if depthleft == 0 {
-        return SearchInfo{
+        return SearchInfoIntm{
             score: quiesce(b, alpha, beta, 1, tt),
-            pv: vec![],
+            nodes: 1
         };
     }
 
@@ -27,21 +27,15 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         Some(tt_entry) => {
             if tt_entry.depthleft >= depthleft as i16 {
                 //println!("Full table hit!");
-                return SearchInfo{
+                return SearchInfoIntm{
                     score: tt_entry.eval_score,
-                    pv: match tt_entry.get_move() {
-                        None => vec![],
-                        Some(m) => vec![m],
-                    }
+                    nodes,
                 }
             } else if tt_entry.eval_score.is_decided() {
                 //println!("Hit on decided position");
-                return SearchInfo {
+                return SearchInfoIntm {
                     score: tt_entry.eval_score,
-                    pv: match tt_entry.get_move() {
-                        None => vec![],
-                        Some(m) => vec![m],
-                    }
+                    nodes,
                 }
             } else if tt_entry.get_move().is_some() {
                 // Ttable entry too shallow, use it only for move ordering
@@ -55,13 +49,14 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     Score::Value(p) => Score::Value(p),
                     Score::Draw => Score::Draw,
                 };
+                nodes += si.nodes;
                 b.unmake();
                 if score >= beta  {
                     // Store self move in TT, move field is refutation move
                     tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode);
-                    return SearchInfo {
+                    return SearchInfoIntm {
                         score: beta,
-                        pv
+                        nodes,
                     };
                 }
                 if score > alpha  {
@@ -69,8 +64,6 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     best_move = Some(m.clone());
                     alpha = score;
                     local_alpha = score;
-                    pv = si.pv;
-                    pv.push(m);
                 } else if score > local_alpha { // Local_alpha <= alpha so if first is true second is true as well.
                     best_move = Some(m.clone());
                     local_alpha = score;
@@ -93,14 +86,14 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     if moves.len() == 0 {
         if !b.is_check(b.side_to_move).is_safe() {
-            return SearchInfo {
+            return SearchInfoIntm {
                 score: Score::Loss(0),
-                pv: vec![]
+                nodes,
             }
         } else {
-            return SearchInfo {
+            return SearchInfoIntm {
                 score: Score::Draw,
-                pv: vec![]
+                nodes,
             }
         }
     }
@@ -118,14 +111,15 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             Score::Value(p) => Score::Value(p),
             Score::Draw => Score::Draw,
         };
+        nodes += si.nodes;
         b.unmake();
         if score >= beta  {
             // Store self move in TT, move field is refutation move
             tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode);
             //println!("Beta cutoff");
-            return SearchInfo {
+            return SearchInfoIntm {
                 score: beta,
-                pv
+                nodes,
             };
         }
         if score > alpha  {
@@ -133,8 +127,6 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             best_move = Some(m.clone());
             alpha = score;
             local_alpha = score;
-            pv = si.pv;
-            pv.push(m.clone());
         } else if score > local_alpha {
             best_move = Some(m.clone());
             local_alpha = score;
@@ -146,8 +138,8 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode),
     };
 
-    return SearchInfo {
+    return SearchInfoIntm {
         score: local_alpha,
-        pv
+        nodes
     }
 }
