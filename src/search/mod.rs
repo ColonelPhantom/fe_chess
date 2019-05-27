@@ -4,6 +4,7 @@ use board::Board;
 mod alphabeta;
 mod quiesce;
 mod see;
+mod moveord;
 pub mod transtable;
 
 #[derive(Debug, Clone, Copy)]

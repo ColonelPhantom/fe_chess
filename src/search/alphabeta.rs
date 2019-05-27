@@ -84,8 +84,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     
     let mut moves = movegen::movegen(b);
 
+    // Sort decending by priority given
     moves.sort_by_cached_key(|m| {
-        -super::see::see_capt(b, m, b.side_to_move)
+        -super::moveord::move_priority(m, b, tt)
     });
 
     if moves.len() == 0 {
