@@ -79,8 +79,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     // Sort decending by priority given
     if depthleft > 1 {
+        let baseline_eval = crate::eval::eval(b);
         moves.sort_by_cached_key(|m| {
-            -super::moveord::move_priority(m, b, tt)
+            -super::moveord::move_priority(m, b, tt, baseline_eval)
         });
     }
 
