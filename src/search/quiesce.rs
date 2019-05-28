@@ -21,7 +21,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         None => {
             sp = sign * eval(b);
             stand_pat = Score::Value(sp);
-            tt.put(b.zobrist, None, -qdepth, stand_pat, super::NodeType::QuiesceEval);
+            tt.put(b.zobrist, None, -qdepth, stand_pat, super::NodeType::QuiesceEval, beta, Some(sp));
         }
         Some(tt_entry) => match tt_entry.node_type {
             NodeType::QuiesceEval | NodeType::PvNode | NodeType::AllNode => {
@@ -72,7 +72,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
 
     let mut cap_moves = movegen::capturegen::cap_gen(b);
     if cap_moves.len() == 0 {
-        tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull);
+        tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull, beta, Some(sp));
     }
     cap_moves.sort_by_cached_key(|m| {
         -super::see::see_capt(b, &m, b.side_to_move)
@@ -99,7 +99,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         b.unmake();
 
         if score >= beta  {
-            tt.put(b.zobrist, Some(m), -qdepth, score, super::NodeType::QuiesceCut);
+            tt.put(b.zobrist, Some(m), -qdepth, score, super::NodeType::QuiesceCut, beta, Some(sp));
             return beta;
         }
         

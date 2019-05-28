@@ -53,7 +53,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 b.unmake();
                 if score >= beta  {
                     // Store self move in TT, move field is refutation move
-                    tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode);
+                    tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, None);
                     return SearchInfoIntm {
                         score: beta,
                         nodes,
@@ -116,7 +116,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         b.unmake();
         if score >= beta  {
             // Store self move in TT, move field is refutation move
-            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode);
+            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, None);
             //println!("Beta cutoff");
             return SearchInfoIntm {
                 score: beta,
@@ -135,8 +135,8 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     }
 
     match !(local_alpha < alpha) {  // match alpha_raised
-        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode),
-        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode),
+        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode, beta, None),
+        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode, beta, None),
     };
 
     return SearchInfoIntm {

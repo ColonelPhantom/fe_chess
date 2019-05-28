@@ -12,8 +12,8 @@ pub fn main() {
     measure_time!(search::search(&mut b, 7, &mut tt), "Time to depth 7: {} ms");
     let mut tt = search::transtable::TransTable::new(22);
     measure_time!(search::search(&mut b, 8, &mut tt), "Time to depth 8: {} ms");
-    let mut tt = search::transtable::TransTable::new(22);
-    measure_time!(search::search(&mut b, 9, &mut tt), "Time to depth 9: {} ms");
+    // let mut tt = search::transtable::TransTable::new(22);
+    // measure_time!(search::search(&mut b, 9, &mut tt), "Time to depth 9: {} ms");
     println!("Transposition table pressure: {}/{}", tt.filled(), 2_u64.pow(22));
 
 
@@ -59,7 +59,7 @@ pub fn main() {
     // println!("Sizeof move: {}", std::mem::size_of::<board::Move>());
     // println!("Sizeof zobrist: {}", std::mem::size_of::<u64>());
     // println!("Sizeof score: {}", std::mem::size_of::<search::Score>());
-    // println!("Sizeof ttEntry: {}", std::mem::size_of::<search::transtable::TtEntry>());
+    println!("Sizeof ttEntry: {}", std::mem::size_of::<search::transtable::TtEntry>());
     // println!("Sizeof PieceType: {}", std::mem::size_of::<board::PieceType>());
     // println!("Sizeof Piece: {}", std::mem::size_of::<board::Piece>());
     // println!("Sizeof Coord0x88: {}", std::mem::size_of::<board::Coord0x88>());

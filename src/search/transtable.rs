@@ -66,6 +66,8 @@ pub struct TtEntry {
     pub depthleft: i16,
     pub eval_score: search::Score,
     pub node_type: search::NodeType,
+    pub beta: search::Score,
+    pub eval: Option<crate::eval::ValCp>,
 }
 impl Default for TtEntry {
     fn default() -> Self {
@@ -75,6 +77,8 @@ impl Default for TtEntry {
             depthleft: std::i16::MIN,
             eval_score: search::Score::Draw,
             node_type: search::NodeType::None,
+            beta: search::Score::Win(0),
+            eval: None,
         }
     }
 } 
@@ -118,7 +122,7 @@ impl TransTable {
 
 
     }
-    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) -> PutState {
+    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>) -> PutState {
         let e = self.t[key as usize];
         let action = self.should_overwrite(zob, &e, m, depth, node_type);
         match action {
@@ -132,6 +136,8 @@ impl TransTable {
                     depthleft: depth,
                     eval_score: score,
                     node_type,
+                    beta,
+                    eval,
                 };
             }
             _ => {}
@@ -140,10 +146,10 @@ impl TransTable {
 
         // No objections, so put the move in.
     }
-    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType) {
+    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>) {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
-            match self.put_actual(zob, key & self.len, m, depth, score, node_type) {
+            match self.put_actual(zob, key & self.len, m, depth, score, node_type, beta, eval) {
                 PutState::Ok => { return },
                 PutState::Occupied => { continue },
                 PutState::Abort => { return },
