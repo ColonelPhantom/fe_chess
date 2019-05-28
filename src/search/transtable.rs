@@ -30,6 +30,15 @@ struct MoveCompact {
     en_passant: u8,
 }
 impl MoveCompact {
+    fn new() -> Self {
+        Self {
+            from: 255,
+            to: 255,
+            promote_to: board::PieceType::None,
+            castling: 255,
+            en_passant: 255,
+        }
+    }
     fn from_move(m: board::Move) -> Self {
         Self {
             from: m.from.0 as u8,
@@ -42,27 +51,30 @@ impl MoveCompact {
             en_passant: compress_en_passant(&m.en_passant),
         }
     }
-    pub fn to_move(&self) -> board::Move {
+    fn to_move(&self) -> Option<board::Move> {
+        if self.from == 255 {
+            return None;
+        }
         let castling = match self.castling {
             255 => None,
             0..=3 => Some(self.castling as usize),
             _ => panic!("Invalid castling. Value: {}", self.castling)
         };
         use std::num::Wrapping;
-        board::Move {
+        Some(board::Move {
             from: Wrapping(self.from as usize),
             to: Wrapping(self.to as usize),
             castling,
             en_passant: expand_en_passant(self.en_passant),
             promote_to: self.promote_to,
-        }
+        })
     }
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct TtEntry {
     pub full_zobrist: u64,
-    first_move: Option<MoveCompact>,
+    first_move: MoveCompact,
     pub depthleft: i16,
     pub eval_score: search::Score,
     pub node_type: search::NodeType,
@@ -73,7 +85,7 @@ impl Default for TtEntry {
     fn default() -> Self {
         Self {
             full_zobrist: 0,
-            first_move: None,
+            first_move: MoveCompact::new(),
             depthleft: std::i16::MIN,
             eval_score: search::Score::Draw,
             node_type: search::NodeType::None,
@@ -84,10 +96,7 @@ impl Default for TtEntry {
 } 
 impl TtEntry {
     pub fn get_move(&self) -> Option<board::Move> {
-        match self.first_move {
-            None => None,
-            Some(m) => Some(m.to_move())
-        }
+        return self.first_move.to_move();
     }
 }
 
@@ -130,8 +139,8 @@ impl TransTable {
                 self.t[key as usize] = TtEntry {
                     full_zobrist: zob,
                     first_move: match m {
-                        None => None,
-                        Some(m) => Some(MoveCompact::from_move(m)),
+                        None => MoveCompact::new(),
+                        Some(m) => MoveCompact::from_move(m),
                     },
                     depthleft: depth,
                     eval_score: score,
