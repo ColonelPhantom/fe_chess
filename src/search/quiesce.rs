@@ -6,8 +6,8 @@ use board::Board;
 use super::Score;
 use super::NodeType;
 
-const MAX_DELTA: i32 = 1000;
-const SEE_DELTA: i32 = 100;
+const MAX_DELTA: crate::eval::ValCp = 1000;
+const SEE_DELTA: crate::eval::ValCp = 100;
 
 pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mut super::transtable::TransTable ) -> Score {
     let sp;
@@ -29,8 +29,8 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
                 sp = match stand_pat {
                     Score::Value(v) => v,
                     Score::Draw => 0,
-                    Score::Win(d) => std::i32::MAX - 1 - d as i32,
-                    Score::Loss(d) => std::i32::MIN + 1 + d as i32,
+                    Score::Win(d) => std::i16::MAX - 1 - d as i16,
+                    Score::Loss(d) => std::i16::MIN + 1 + d as i16,
                 }
             }
             NodeType::QuiesceCut | NodeType::CutNode => {

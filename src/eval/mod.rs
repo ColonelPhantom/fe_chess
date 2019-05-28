@@ -2,9 +2,9 @@ use crate::board::*;
 
 mod pst;
 
-type ValCp = i32;
+pub type ValCp = i16;
 
-const KING_VAL: ValCp = 200000;
+const KING_VAL: ValCp = 20000;
 const QUEEN_VAL: ValCp = 900;
 const ROOK_VAL: ValCp = 500;
 const BISHOP_VAL: ValCp = 320;
@@ -39,8 +39,8 @@ pub fn piece_val(p: PieceType) -> ValCp {
         _ => 0,
     }
 }
-pub fn eval(b: &mut Board) -> i32 {
-    let mut score: i32 = 0;
+pub fn eval(b: &mut Board) -> ValCp {
+    let mut score: ValCp = 0;
     // let b_sign = match b.side_to_move {
     //     WHITE => 1,
     //     BLACK => -1,

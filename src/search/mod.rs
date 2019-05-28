@@ -10,7 +10,7 @@ pub mod transtable;
 #[derive(Debug, Clone, Copy)]
 pub enum Score {
     Draw,
-    Value(i32),
+    Value(crate::eval::ValCp),
     Win(u16),
     Loss(u16),
 }

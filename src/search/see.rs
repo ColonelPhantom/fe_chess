@@ -1,6 +1,6 @@
 use crate::board;
 
-pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32 {
+pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> crate::eval::ValCp {
     let att = b.under_attack(sq, !side);    // Who of us can attack the opponent in sq?
     // Get the least valuable attacker
     let lva = match att {
@@ -23,7 +23,7 @@ pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> i32
     return value;
 }
 
-pub fn see_capt(b: &mut board::Board, m: &board::Move, side: board::Side) -> i32 {
+pub fn see_capt(b: &mut board::Board, m: &board::Move, side: board::Side) -> crate::eval::ValCp {
     let captured = crate::eval::piece_val(b[m.to].piece_type);
     b.make(m);
     let value = captured - see(b, m.to, !side);
