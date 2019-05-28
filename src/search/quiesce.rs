@@ -24,25 +24,25 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
             tt.put(b.zobrist, None, -qdepth, stand_pat, super::NodeType::QuiesceEval, beta, Some(sp));
         }
         Some(tt_entry) => match tt_entry.node_type {
-            NodeType::QuiesceEval | NodeType::PvNode | NodeType::AllNode => {
-                stand_pat = tt_entry.eval_score;
-                sp = match stand_pat {
-                    Score::Value(v) => v,
-                    Score::Draw => 0,
-                    Score::Win(d) => std::i16::MAX - 1 - d as i16,
-                    Score::Loss(d) => std::i16::MIN + 1 + d as i16,
+            NodeType::QuiesceEval => {
+                sp = tt_entry.eval.unwrap();
+                stand_pat = Score::Value(sp);
+            }
+            NodeType::QuiesceFull | NodeType::AllNode | NodeType::PvNode => {
+                if beta <= tt_entry.beta {
+                    return tt_entry.eval_score;
+                } else {
+                    sp = tt_entry.eval.unwrap();
+                    stand_pat = Score::Value(sp); 
                 }
             }
             NodeType::QuiesceCut | NodeType::CutNode => {
                 if tt_entry.eval_score >= beta {
-                    return beta;
+                    return tt_entry.eval_score;
+                } else {
+                    sp = tt_entry.eval.unwrap_or_else(|| sign * eval(b));
+                    stand_pat = Score::Value(sp); 
                 }
-                sp = sign * eval(b);
-                stand_pat = Score::Value(sp);
-            }
-            NodeType::QuiesceFull => {
-               return tt_entry.eval_score;
-
             }
             NodeType::None => panic!("Tt.get returned some but type is None"),
         }
@@ -71,9 +71,9 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
     let mut local_alpha = stand_pat;
 
     let mut cap_moves = movegen::capturegen::cap_gen(b);
-    if cap_moves.len() == 0 {
-        tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull, beta, Some(sp));
-    }
+    // if cap_moves.len() == 0 {
+    //     tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull, beta, Some(sp));
+    // }
     cap_moves.sort_by_cached_key(|m| {
         -super::see::see_capt(b, &m, b.side_to_move)
     });
@@ -111,6 +111,8 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         } else {
         }
     }
+
+    tt.put(b.zobrist, None, -qdepth, local_alpha, NodeType::QuiesceFull, beta, Some(sp));
 
     return local_alpha;
 }

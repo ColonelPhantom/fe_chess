@@ -41,6 +41,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 // Ttable entry too shallow, use it only for move ordering
                 //println!("Partial table hit!");
                 let m = tt_entry.get_move().unwrap();
+                let eval = tt_entry.eval.clone();
                 b.make(&m);
                 let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
                 let score = match -si.score {
@@ -53,7 +54,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 b.unmake();
                 if score >= beta  {
                     // Store self move in TT, move field is refutation move
-                    tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, None);
+                    tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, eval);
                     return SearchInfoIntm {
                         score: beta,
                         nodes,
@@ -78,8 +79,12 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     let mut moves = movegen::movegen(b);
 
     // Sort decending by priority given
+    let baseline_eval = crate::eval::eval(b);
+    let eval = baseline_eval * match b.side_to_move {
+        board::WHITE => 1,
+        board::BLACK => -1,
+    };
     if depthleft > 1 {
-        let baseline_eval = crate::eval::eval(b);
         moves.sort_by_cached_key(|m| {
             -super::moveord::move_priority(m, b, tt, baseline_eval)
         });
@@ -116,8 +121,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         b.unmake();
         if score >= beta  {
             // Store self move in TT, move field is refutation move
-            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, None);
-            //println!("Beta cutoff");
+            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, Some(eval));
             return SearchInfoIntm {
                 score: beta,
                 nodes,
@@ -135,8 +139,8 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     }
 
     match !(local_alpha < alpha) {  // match alpha_raised
-        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode, beta, None),
-        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode, beta, None),
+        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode, beta, Some(eval)),
+        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode, beta, Some(eval)),
     };
 
     return SearchInfoIntm {
