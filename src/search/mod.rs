@@ -134,11 +134,40 @@ pub struct SearchInfoIntm {
     pub nodes: u64,
 }
 
-pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo {
-    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, tt);
+const ASPIRATION_WIDTH: i16 = 100;
+
+fn aspirate(b: &mut Board, depth: usize, tt: &mut transtable::TransTable, prev_info: SearchInfoIntm) -> SearchInfoIntm {
+    let alpha = match prev_info.score {
+        Score::Draw => Score::Value(-ASPIRATION_WIDTH),
+        Score::Value(v) => Score::Value(v - ASPIRATION_WIDTH),
+        Score::Win(d) => Score::Win(d + 1),
+        Score::Loss(d) => Score::Loss(std::cmp::max(d as i32 - 1, 0) as u16),
+    };
+    let beta = match prev_info.score {
+        Score::Draw => Score::Value(ASPIRATION_WIDTH),
+        Score::Value(v) => Score::Value (v + ASPIRATION_WIDTH),
+        Score::Win(d) => Score::Win(std::cmp::max(d as i32 - 1, 0) as u16),
+        Score::Loss(d) => Score::Loss(d + 1),
+    };
+    let si = alphabeta::alpha_beta(b, alpha, beta, depth, tt);
+    if si.score >= beta || si.score <= alpha {
+        // Aspiration window failed; return full alphabeta
+        println!("Aspiration failed");
+        let new_si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
+        return SearchInfoIntm {
+            score: new_si.score,
+            nodes: new_si.nodes + si.nodes,
+        }
+    }
+    return si;
+}
+
+pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo
+{
+    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 0, tt);
     let mut nodes = si.nodes;
-    for d in 2..=depth {
-        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, tt);
+    for d in 1..=depth {
+        si = aspirate(b, d, tt, si);
         nodes += si.nodes;
     }
     // let si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
