@@ -1,7 +1,9 @@
 use crate::board;
 use crate::search;
 
-const HASH_SHIFTS: [u64; 4] = [0, 26, 52, 14];
+// const HASH_SHIFTS: [u64; 4] = [0, 26, 52, 14];
+// const HASH_SHIFTS: [u64; 2] = [0, 32];
+const HASH_SHIFTS: [u64; 8] = [0, 32, 16, 8, 24, 40, 48, 4];
 
 fn expand_en_passant(ep: u8) -> board::EnPassantState {
     use board::EnPassantState::*;
