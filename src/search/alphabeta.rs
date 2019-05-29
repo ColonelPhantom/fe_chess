@@ -22,56 +22,62 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         };
     }
 
+    let eval;
+    let baseline_eval;
+
     match tt.get(b.zobrist) {
+        None => {
+            baseline_eval = crate::eval::eval(b);
+            eval = baseline_eval * match b.side_to_move {
+                board::WHITE => 1,
+                board::BLACK => -1,
+            };
         None => {},
+        },
         Some(tt_entry) => {
-            if tt_entry.depthleft >= depthleft as i16 {
-                //println!("Full table hit!");
-                return SearchInfoIntm{
-                    score: tt_entry.eval_score,
-                    nodes,
-                }
-            } else if tt_entry.eval_score.is_decided() {
-                //println!("Hit on decided position");
-                return SearchInfoIntm {
-                    score: tt_entry.eval_score,
-                    nodes,
-                }
-            } else if tt_entry.get_move().is_some() {
-                // Ttable entry too shallow, use it only for move ordering
-                //println!("Partial table hit!");
-                let m = tt_entry.get_move().unwrap();
-                let eval = tt_entry.eval.clone();
-                b.make(&m);
-                let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
-                let score = match -si.score {
-                    Score::Win(d) => Score::Win(d+1),
-                    Score::Loss(d) => Score::Loss(d+1),
-                    Score::Value(p) => Score::Value(p),
-                    Score::Draw => Score::Draw,
-                };
-                nodes += si.nodes;
-                b.unmake();
-                if score >= beta  {
-                    // Store self move in TT, move field is refutation move
-                    tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, eval);
-                    return SearchInfoIntm {
-                        score: beta,
-                        nodes,
+            match tt_entry.node_type {
+                NodeType::None => panic!("Tt.get returned some but type is None"),
+                NodeType::QuiesceEval | NodeType::QuiesceFull | NodeType::QuiesceCut => {
+                    eval = tt_entry.eval.unwrap();
+                    baseline_eval = eval * match b.side_to_move {
+                        board::WHITE => 1,
+                        board::BLACK => -1,
                     };
                 }
-                if score > alpha  {
-                    // Remember this move to be stored in TT
-                    best_move = Some(m.clone());
-                    alpha = score;
-                    local_alpha = score;
-                } else if score > local_alpha { // Local_alpha <= alpha so if first is true second is true as well.
-                    best_move = Some(m.clone());
-                    local_alpha = score;
+                NodeType::AllNode | NodeType::PvNode => {
+                    if tt_entry.depthleft >= depthleft as i16 {
+                        if beta <= tt_entry.beta {
+                            return SearchInfoIntm{
+                                score: tt_entry.eval_score,
+                                nodes
+                            };
+                        } else {
+                            local_alpha = tt_entry.eval_score;
+                            if local_alpha > alpha {
+                                alpha = local_alpha;
+                            }
+                        }
+                    }
+                    eval = tt_entry.eval.unwrap();
+                    baseline_eval = eval * match b.side_to_move {
+                        board::WHITE => 1,
+                        board::BLACK => -1,
+                    }
                 }
-            } else {
-                // No use for TT entry
-                //println!("Useless TT entry with depth difference {}, alpha {} and beta {}: {:?}", depthleft as u16 - tt_entry.depthleft, alpha, beta, tt_entry);
+                NodeType::CutNode => {
+                    if tt_entry.depthleft >= depthleft as i16 && tt_entry.eval_score >= beta {
+                        return SearchInfoIntm {
+                            score: tt_entry.eval_score,
+                            nodes
+                        };
+                    } else {
+                        eval = tt_entry.eval.unwrap();
+                        baseline_eval = eval * match b.side_to_move {
+                            board::WHITE => 1,
+                            board::BLACK => -1,
+                        };
+                    }
+                }
             }
         }
     }
@@ -79,11 +85,6 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     let mut moves = movegen::movegen(b);
 
     // Sort decending by priority given
-    let baseline_eval = crate::eval::eval(b);
-    let eval = baseline_eval * match b.side_to_move {
-        board::WHITE => 1,
-        board::BLACK => -1,
-    };
     if depthleft > 1 {
         moves.sort_by_cached_key(|m| {
             -super::moveord::move_priority(m, b, tt, baseline_eval)
