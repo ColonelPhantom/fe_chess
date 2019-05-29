@@ -6,10 +6,10 @@ use crate::search::see;
 const SEE_WEIGHT: i32 = 1;
 const EVAL_WEIGHT: i32 = 1;
 const CHECK_BONUS: i32 = 10000;
-const TT_BONUS: i32 = 500;
+const TT_BONUS: i32 = 60000;
 const TT_QUIESCE_BONUS: i32 = 1;
 
-pub fn move_priority(m: &board::Move, b: &mut board::Board, _tt: &TransTable, baseline_eval: crate::eval::ValCp, tt_entry: Option<&TtEntry>) -> i32 {
+pub fn move_priority(m: &board::Move, b: &mut board::Board, tt: &TransTable, baseline_eval: crate::eval::ValCp, tt_entry: Option<&TtEntry>) -> i32 {
     let tt_bonus = match tt_entry {
         Some(e) if e.depthleft > 1 => {
             match e.get_move() {
@@ -34,11 +34,20 @@ pub fn move_priority(m: &board::Move, b: &mut board::Board, _tt: &TransTable, ba
         _ => 0
     };
     b.make(m);
-    let static_eval_score = (crate::eval::eval(b) - baseline_eval) as i32 * match !b.side_to_move {
+    let static_eval_sign: i32 = match !b.side_to_move {
         // If white is making m, higher is better
         board::WHITE => 1,
         board::BLACK => -1,
     };
+    let static_eval_eval = match tt.get(b.zobrist) {
+        Some(e) if e.eval.is_some() => {
+            //assert_eq!(-static_eval_sign as i16 * e.eval.unwrap(), crate::eval::eval(b));
+            -static_eval_sign * (e.eval.unwrap() as i32)
+        } 
+        _ => { crate::eval::eval(b) as i32 }
+    };
+    // let static_eval_eval = crate::eval::eval(b) as i32;
+    let static_eval_score = static_eval_sign * EVAL_WEIGHT *  (static_eval_eval - baseline_eval as i32);
     let check_bonus = CHECK_BONUS * match b.is_check(b.side_to_move) {
         board::ThreatInfo::Safe => 0,
         board::ThreatInfo::Single(_c) => 1,
