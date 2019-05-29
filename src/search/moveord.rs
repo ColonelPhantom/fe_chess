@@ -34,19 +34,22 @@ pub fn move_priority(m: &board::Move, b: &mut board::Board, tt: &TransTable, bas
         _ => 0
     };
     b.make(m);
+    let tt_sub_entry = match tt_entry {
+        None => None,
+        Some(_e) => tt.get(b.zobrist),
+    };
     let static_eval_sign: i32 = match !b.side_to_move {
         // If white is making m, higher is better
         board::WHITE => 1,
         board::BLACK => -1,
     };
-    let static_eval_eval = match tt.get(b.zobrist) {
+    let static_eval_eval = match tt_sub_entry {
         Some(e) if e.eval.is_some() => {
             //assert_eq!(-static_eval_sign as i16 * e.eval.unwrap(), crate::eval::eval(b));
             -static_eval_sign * (e.eval.unwrap() as i32)
         } 
         _ => { crate::eval::eval(b) as i32 }
     };
-    // let static_eval_eval = crate::eval::eval(b) as i32;
     let static_eval_score = static_eval_sign * EVAL_WEIGHT *  (static_eval_eval - baseline_eval as i32);
     let check_bonus = CHECK_BONUS * match b.is_check(b.side_to_move) {
         board::ThreatInfo::Safe => 0,
