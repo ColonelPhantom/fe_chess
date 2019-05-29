@@ -14,6 +14,22 @@ fe_chess currently only has a simple built-in shell that is not compatible with 
 
 # Changelog
 ## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.3...master)
+## [v0.4.0](https://github.com/ColonelPhantom/fe_chess/compare/v0.3.0...v0.4.0)
+* Add quiescence move ordering
+* Increase standard search depth to 6
+* Start testing opening position
+* Better move ordering
+  * Was only SEE
+  * Added: static eval
+  * Added: check
+  * Give TT move priority bonus for DRY coding
+* Make score i16 instead of i32
+* Remove PV from search
+* Implement node counting
+* Add beta and static eval to transposition table
+* Rewrite tt.get usage
+## [v0.3.0](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.3...v0.3.0)
+* TODO: fill this out
 ## [v0.2.3](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.2...v0.2.3)
 * Make search use table hits of which the outcome is decided (Win, Draw, Loss)
 * Remove previous PV from search
