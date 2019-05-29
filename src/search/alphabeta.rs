@@ -24,6 +24,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     let eval;
     let baseline_eval;
+    let tt_move;
 
     match tt.get(b.zobrist) {
         None => {
@@ -32,9 +33,10 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 board::WHITE => 1,
                 board::BLACK => -1,
             };
-        None => {},
+            tt_move = None;
         },
         Some(tt_entry) => {
+            tt_move = tt_entry.get_move();
             match tt_entry.node_type {
                 NodeType::None => panic!("Tt.get returned some but type is None"),
                 NodeType::QuiesceEval | NodeType::QuiesceFull | NodeType::QuiesceCut => {
@@ -103,6 +105,10 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 nodes,
             }
         }
+    }
+
+    if let Some(m) = tt_move {
+        moves.insert(0, m);
     }
 
     for m in moves {
