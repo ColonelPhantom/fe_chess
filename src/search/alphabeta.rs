@@ -24,19 +24,18 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     let eval;
     let baseline_eval;
-    let tt_move;
 
-    match tt.get(b.zobrist) {
+    let tt_e = tt.get(b.zobrist);
+
+    match tt_e {
         None => {
             baseline_eval = crate::eval::eval(b);
             eval = baseline_eval * match b.side_to_move {
                 board::WHITE => 1,
                 board::BLACK => -1,
             };
-            tt_move = None;
         },
         Some(tt_entry) => {
-            tt_move = tt_entry.get_move();
             match tt_entry.node_type {
                 NodeType::None => panic!("Tt.get returned some but type is None"),
                 NodeType::QuiesceEval | NodeType::QuiesceFull | NodeType::QuiesceCut => {
@@ -47,6 +46,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     };
                 }
                 NodeType::AllNode | NodeType::PvNode => {
+                    // TODO: use decided position even when insufficient depth
                     if tt_entry.depthleft >= depthleft as i16 {
                         if beta <= tt_entry.beta {
                             return SearchInfoIntm{
@@ -89,7 +89,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     // Sort decending by priority given
     if depthleft > 1 {
         moves.sort_by_cached_key(|m| {
-            -super::moveord::move_priority(m, b, tt, baseline_eval)
+            -super::moveord::move_priority(m, b, tt, baseline_eval, tt_e)
         });
     }
 
@@ -107,9 +107,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         }
     }
 
-    if let Some(m) = tt_move {
-        moves.insert(0, m);
-    }
+    // if let Some(m) = tt_move {
+    //     moves.insert(0, m);
+    // }
 
     for m in moves {
         b.make(&m);
