@@ -197,6 +197,11 @@ impl std::fmt::Display for Move {
         )
     }
 }
+impl std::cmp::PartialEq for Move {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.from == rhs.from && self.to == rhs.to
+    }
+}
 
 pub struct Unmove {
     pub from: Coord0x88,
