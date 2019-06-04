@@ -13,7 +13,7 @@ It can also be ran with `cargo run --release` or the binaries on the Releases pa
 fe_chess currently only has a simple built-in shell that is not compatible with uci. Type `help` to get a list of command. (UCI not functional).
 
 # Changelog
-## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.3...master)
+## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.4.0...master)
 ## [v0.4.0](https://github.com/ColonelPhantom/fe_chess/compare/v0.3.0...v0.4.0)
 * Add quiescence move ordering
 * Increase standard search depth to 6
@@ -29,7 +29,8 @@ fe_chess currently only has a simple built-in shell that is not compatible with 
 * Add beta and static eval to transposition table
 * Rewrite tt.get usage
 ## [v0.3.0](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.3...v0.3.0)
-* TODO: fill this out
+* Implement basic SEE-based move ordering
+* Rewrites mostly related to the transposition table
 ## [v0.2.3](https://github.com/ColonelPhantom/fe_chess/compare/v0.2.2...v0.2.3)
 * Make search use table hits of which the outcome is decided (Win, Draw, Loss)
 * Remove previous PV from search
