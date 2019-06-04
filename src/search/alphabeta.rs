@@ -8,7 +8,7 @@ use super::Score;
 use super::transtable::TransTable;
 use super::NodeType;
 
-const NODES_REDUCE: [u8; 4] = [4, 10, 20, 40];
+const NODES_REDUCE: [u8; 5] = [4, 8, 16, 32, 64];
 
 pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
  -> SearchInfoIntm
