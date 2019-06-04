@@ -154,7 +154,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             local_alpha = score;
         }
         // LMR reduction update
-        if depthleft > 4 && lmr_reduction < NODES_REDUCE.len() && lmr_reduction < depthleft - 1 && nodes_searched >= NODES_REDUCE[lmr_reduction] {
+        if depthleft > 2 && lmr_reduction < NODES_REDUCE.len() && lmr_reduction < depthleft - 1 && nodes_searched >= NODES_REDUCE[lmr_reduction] {
             lmr_reduction += 1;
         }
         nodes_searched += 1;
