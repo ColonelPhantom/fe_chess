@@ -144,7 +144,7 @@ pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> S
     }
     // let si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
     //println!("Transtable filled with {} entries (capacity {})", tt.filled(), tt.len);
-    if depth >= 7 {println!("Node count {}", nodes)};
+    if depth > 5 {println!("Node count {}", nodes)};
     return SearchInfo {
         score: si.score,
         pv: tt.get_pv(b),
