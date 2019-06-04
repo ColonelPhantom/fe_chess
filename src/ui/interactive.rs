@@ -61,6 +61,20 @@ pub fn main() {
         Ok(())
     });
 
+    shell.new_command_noargs("go", "Let the engine make a move", |io,s| {
+        let mut t = search::search(&mut s.board, s.depth, &mut s.transtable);
+        let m = t.pv.pop().expect("No move found!");
+        writeln!(io, "Move: {}", m)?;
+        writeln!(io, "Score: {}", t.score)?;
+        while let Some(m) = t.pv.pop() {
+            print!("{} ",m);
+        }
+        println!();
+
+        s.board.make(&m);
+        Ok(())
+    });
+
     shell.new_command_noargs("reset", "Put the board back in the starting position", |_,s| {
         s.board = board::Board::new();
         s.thought = None;
