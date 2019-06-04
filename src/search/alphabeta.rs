@@ -8,12 +8,18 @@ use super::Score;
 use super::transtable::TransTable;
 use super::NodeType;
 
+const NODES_REDUCE: [usize; 6] = [2, 4, 8, 16, 32, 64];
+
 pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
  -> SearchInfoIntm
 {
     let mut local_alpha = Score::Loss(0);
     let mut best_move: Option<board::Move> = None;
     let mut nodes = 1;
+
+    if depthleft > std::usize::MAX / 2 {
+        panic!("Depth < 0");
+    }
 
     if depthleft == 0 {
         return SearchInfoIntm{
@@ -93,6 +99,10 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         });
     }
 
+    // Late move reduction
+    let mut lmr_reduction = 0;
+    let mut nodes_searched = 0;
+
     if moves.len() == 0 {
         if !b.is_check(b.side_to_move).is_safe() {
             return SearchInfoIntm {
@@ -117,7 +127,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             b.unmake();
             continue;
         }
-        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
+        let si = alpha_beta(b, -beta, -alpha, (depthleft - 1) - lmr_reduction, tt);
         let score = match -si.score {
             Score::Win(d) => Score::Win(d+1),
             Score::Loss(d) => Score::Loss(d+1),
@@ -143,6 +153,11 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             best_move = Some(m.clone());
             local_alpha = score;
         }
+        // LMR reduction update
+        if depthleft > 2 && lmr_reduction < NODES_REDUCE.len() && lmr_reduction < depthleft - 1 && nodes_searched >= NODES_REDUCE[lmr_reduction] {
+            lmr_reduction += 1;
+        }
+        nodes_searched += 1;
     }
 
     match !(local_alpha < alpha) {  // match alpha_raised
