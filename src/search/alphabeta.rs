@@ -8,7 +8,7 @@ use super::Score;
 use super::transtable::TransTable;
 use super::NodeType;
 
-const NODES_REDUCE: [u8; 5] = [4, 8, 16, 32, 64];
+const NODES_REDUCE: [usize; 6] = [2, 4, 8, 16, 32, 64];
 
 pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
  -> SearchInfoIntm
@@ -150,7 +150,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             local_alpha = score;
         }
         // LMR reduction update
-        if depthleft > 4 && lmr_reduction < NODES_REDUCE.len() && nodes_searched >= NODES_REDUCE[lmr_reduction] {
+        if depthleft > 4 && lmr_reduction < NODES_REDUCE.len() && lmr_reduction < depthleft - 1 && nodes_searched >= NODES_REDUCE[lmr_reduction] {
             lmr_reduction += 1;
         }
         nodes_searched += 1;
