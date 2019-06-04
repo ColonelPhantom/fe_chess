@@ -17,6 +17,10 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     let mut best_move: Option<board::Move> = None;
     let mut nodes = 1;
 
+    if depthleft > std::usize::MAX / 2 {
+        panic!("Depth < 0");
+    }
+
     if depthleft == 0 {
         return SearchInfoIntm{
             score: quiesce(b, alpha, beta, 1, tt),
