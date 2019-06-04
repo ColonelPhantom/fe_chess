@@ -8,6 +8,8 @@ use super::Score;
 use super::transtable::TransTable;
 use super::NodeType;
 
+const NODES_REDUCE: [u8; 4] = [4, 10, 20, 40];
+
 pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
  -> SearchInfoIntm
 {
@@ -93,6 +95,10 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         });
     }
 
+    // Late move reduction
+    let mut lmr_reduction = 0;
+    let mut nodes_searched = 0;
+
     if moves.len() == 0 {
         if !b.is_check(b.side_to_move).is_safe() {
             return SearchInfoIntm {
@@ -117,7 +123,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             b.unmake();
             continue;
         }
-        let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
+        let si = alpha_beta(b, -beta, -alpha, (depthleft - 1) - lmr_reduction, tt);
         let score = match -si.score {
             Score::Win(d) => Score::Win(d+1),
             Score::Loss(d) => Score::Loss(d+1),
@@ -143,6 +149,11 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             best_move = Some(m.clone());
             local_alpha = score;
         }
+        // LMR reduction update
+        if depthleft > 4 && lmr_reduction < NODES_REDUCE.len() && nodes_searched >= NODES_REDUCE[lmr_reduction] {
+            lmr_reduction += 1;
+        }
+        nodes_searched += 1;
     }
 
     match !(local_alpha < alpha) {  // match alpha_raised
