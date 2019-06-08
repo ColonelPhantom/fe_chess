@@ -128,14 +128,31 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             continue;
         }
         let si = alpha_beta(b, -beta, -alpha, (depthleft - 1) - lmr_reduction, tt);
-        let score = match -si.score {
+        let score_lmr = match -si.score {
             Score::Win(d) => Score::Win(d+1),
             Score::Loss(d) => Score::Loss(d+1),
             Score::Value(p) => Score::Value(p),
             Score::Draw => Score::Draw,
         };
         nodes += si.nodes;
+
+        let score;
+        if lmr_reduction > 0 && (score_lmr >= beta || score_lmr > alpha || score_lmr > local_alpha) {
+            let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
+            score = match -si.score {
+                Score::Win(d) => Score::Win(d+1),
+                Score::Loss(d) => Score::Loss(d+1),
+                Score::Value(p) => Score::Value(p),
+                Score::Draw => Score::Draw,
+            };
+            nodes += si.nodes;
+            // println!("Score meaningful with LMR {} (lmr_score = {}, score = {}", lmr_reduction, score_lmr, score);
+        } else {
+            score = score_lmr;
+        }
+
         b.unmake();
+
         if score >= beta  {
             // Store self move in TT, move field is refutation move
             tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, Some(eval));
