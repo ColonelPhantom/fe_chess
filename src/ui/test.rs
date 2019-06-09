@@ -61,6 +61,15 @@ pub fn main() {
     let mut tt = search::transtable::TransTable::new(22);
     measure_time!(search::search(&mut b, 10, &mut tt), "Time to depth 10: {} ms");
     println!("Transposition table pressure: {}/{}", tt.filled(), 2_u64.pow(22));
+
+    b = board::Board::from_fen("q2k2q1/2nqn2b/1n1P1n1b/2rnr2Q/1NQ1QN1Q/3Q3B/2RQR2B/Q2K2Q1 w - -");
+    let mut tt = search::transtable::TransTable::new(22);
+    measure_time!(search::search(&mut b, 5, &mut tt), "Time to depth 5: {} ms");
+    let mut tt = search::transtable::TransTable::new(22);
+    measure_time!(search::search(&mut b, 6, &mut tt), "Time to depth 6: {} ms");
+    let mut tt = search::transtable::TransTable::new(22);
+    measure_time!(search::search(&mut b, 7, &mut tt), "Time to depth 7: {} ms");
+
     
 
     // println!("Sizeof board: {}", std::mem::size_of::<board::Board>());
