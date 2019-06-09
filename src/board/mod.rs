@@ -323,7 +323,7 @@ impl Board {
             str_pos = i;
             match c {
                 ' ' => break,
-                '_' => break,
+                '-' => break,
                 'k' => b.castling[CR_KING + 0],
                 'K' => b.castling[CR_KING + 1],
                 'q' => b.castling[CR_QUEEN + 0],
@@ -349,6 +349,8 @@ impl Board {
         }
 
         // TODO: halfmove and fullmove counter
+
+        b.zobrist = b.zobrist_init();
 
 
         return b;
