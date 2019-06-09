@@ -288,13 +288,19 @@ impl Board {
                 'B' => b[c0x88(file, rank)] = pieces::WBISHOP,
                 'R' => b[c0x88(file, rank)] = pieces::WROOK,
                 'Q' => b[c0x88(file, rank)] = pieces::WQUEEN,
-                'K' => b[c0x88(file, rank)] = pieces::WKING,
+                'K' => b[c0x88(file, rank)] = {
+                    b.king_pos[WHITE as usize] = c0x88(file, rank);
+                    pieces::WKING
+                },
                 'p' => b[c0x88(file, rank)] = pieces::BPAWN,
                 'n' => b[c0x88(file, rank)] = pieces::BKNIGHT,
                 'b' => b[c0x88(file, rank)] = pieces::BBISHOP,
                 'r' => b[c0x88(file, rank)] = pieces::BROOK,
                 'q' => b[c0x88(file, rank)] = pieces::BQUEEN,
-                'k' => b[c0x88(file, rank)] = pieces::BKING,
+                'k' => b[c0x88(file, rank)] = {
+                    b.king_pos[BLACK as usize] = c0x88(file, rank);
+                    pieces::BKING
+                },
                 ' ' => break,
                 _ => panic!("Invalid character {} in FEN at position {}", c, i),
             }
