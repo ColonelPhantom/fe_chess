@@ -255,7 +255,7 @@ impl Board {
             en_passant: None,
             king_pos: [c0x88::e1, c0x88::e8],
             check_cache: None,
-            castling: [true, true, true, true],
+            castling: [false, false, false, false],
             zobrist: 0,
         };
         b.zobrist = b.zobrist_init();
