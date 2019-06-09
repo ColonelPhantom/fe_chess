@@ -245,8 +245,25 @@ impl Board {
         return b;
     }
 
+    pub fn new_empty() -> Board {
+        use pieces::NONE;
+        let mut b = Board {
+            mailbox: [NONE; 128],
+            unmake_stack: Vec::new(),
+            side_to_move: WHITE,
+            revmov_clock: 0,
+            en_passant: None,
+            king_pos: [c0x88::e1, c0x88::e8],
+            check_cache: None,
+            castling: [true, true, true, true],
+            zobrist: 0,
+        };
+        b.zobrist = b.zobrist_init();
+        return b;
+    }
+
     pub fn from_fen(fen: &str) -> Board {
-        let mut b = Board::new();
+        let mut b = Board::new_empty();
         let fen = fen.trim();
 
         // Board occupation
@@ -255,26 +272,29 @@ impl Board {
         let mut str_pos = 0;
         for (i, c) in fen.chars().enumerate() {
             str_pos = i;
+            print!("{}", c);
             match c {
                 '/' => {
                     rank -= 1;
                     file = 0;
+                    continue;
                 }
                 '1' ..= '8' => {
                     file += c.to_digit(10).unwrap() as isize;
+                    continue;
                 },
-                'p' => b[c0x88(file, rank)] = pieces::WPAWN,
-                'n' => b[c0x88(file, rank)] = pieces::WKNIGHT,
-                'b' => b[c0x88(file, rank)] = pieces::WBISHOP,
-                'r' => b[c0x88(file, rank)] = pieces::WROOK,
-                'q' => b[c0x88(file, rank)] = pieces::WQUEEN,
-                'k' => b[c0x88(file, rank)] = pieces::WKING,
-                'P' => b[c0x88(file, rank)] = pieces::BPAWN,
-                'N' => b[c0x88(file, rank)] = pieces::BKNIGHT,
-                'B' => b[c0x88(file, rank)] = pieces::BBISHOP,
-                'R' => b[c0x88(file, rank)] = pieces::BROOK,
-                'Q' => b[c0x88(file, rank)] = pieces::BQUEEN,
-                'K' => b[c0x88(file, rank)] = pieces::BKING,
+                'P' => b[c0x88(file, rank)] = pieces::WPAWN,
+                'N' => b[c0x88(file, rank)] = pieces::WKNIGHT,
+                'B' => b[c0x88(file, rank)] = pieces::WBISHOP,
+                'R' => b[c0x88(file, rank)] = pieces::WROOK,
+                'Q' => b[c0x88(file, rank)] = pieces::WQUEEN,
+                'K' => b[c0x88(file, rank)] = pieces::WKING,
+                'p' => b[c0x88(file, rank)] = pieces::BPAWN,
+                'n' => b[c0x88(file, rank)] = pieces::BKNIGHT,
+                'b' => b[c0x88(file, rank)] = pieces::BBISHOP,
+                'r' => b[c0x88(file, rank)] = pieces::BROOK,
+                'q' => b[c0x88(file, rank)] = pieces::BQUEEN,
+                'k' => b[c0x88(file, rank)] = pieces::BKING,
                 ' ' => break,
                 _ => panic!("Invalid character {} in FEN at position {}", c, i),
             }
@@ -283,6 +303,7 @@ impl Board {
 
         // Side to move
         let fen = fen[str_pos+1 ..].trim();
+        println!("{}", fen);
         b.side_to_move = match fen.chars().nth(0).expect("FEN too short") {
             'w' => WHITE,
             'b' => BLACK,
@@ -307,16 +328,15 @@ impl Board {
 
         // Enpassant
         let fen = fen[str_pos..].trim();
-        let mut iter = fen.chars();
-        match iter.nth(0).expect("Fen too short") {
+        match fen.chars().nth(0).expect("Fen too short") {
             '-' => {},
             'a'..='h' => {
-                let file = iter.nth(0).unwrap() as isize - 'a' as isize;
-                let rank = iter.nth(1).unwrap() as isize - '1' as isize;
+                let file = fen.chars().nth(0).unwrap() as isize - 'a' as isize;
+                let rank = fen.chars().nth(1).unwrap() as isize - '1' as isize;
                 b.en_passant = Some(match rank {
                     2 => c0x88(file, 3),
                     5 => c0x88(file, 4),
-                    _ => panic!("Wrong ep rank in fen!"),
+                    _ => panic!("Wrong ep rank in fen! {}", rank),
                 });
             }
             _ => panic!("Invalid enpassant"),
