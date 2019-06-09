@@ -247,6 +247,83 @@ impl Board {
 
     pub fn from_fen(fen: &str) -> Board {
         let mut b = Board::new();
+        let fen = fen.trim();
+
+        // Board occupation
+        let mut rank: isize = 7;
+        let mut file: isize = 0;
+        let mut str_pos = 0;
+        for (i, c) in fen.chars().enumerate() {
+            str_pos = i;
+            match c {
+                '/' => {
+                    rank -= 1;
+                    file = 0;
+                }
+                '1' ..= '8' => {
+                    file += c.to_digit(10).unwrap() as isize;
+                },
+                'p' => b[c0x88(file, rank)] = pieces::WPAWN,
+                'n' => b[c0x88(file, rank)] = pieces::WKNIGHT,
+                'b' => b[c0x88(file, rank)] = pieces::WBISHOP,
+                'r' => b[c0x88(file, rank)] = pieces::WROOK,
+                'q' => b[c0x88(file, rank)] = pieces::WQUEEN,
+                'k' => b[c0x88(file, rank)] = pieces::WKING,
+                'P' => b[c0x88(file, rank)] = pieces::BPAWN,
+                'N' => b[c0x88(file, rank)] = pieces::BKNIGHT,
+                'B' => b[c0x88(file, rank)] = pieces::BBISHOP,
+                'R' => b[c0x88(file, rank)] = pieces::BROOK,
+                'Q' => b[c0x88(file, rank)] = pieces::BQUEEN,
+                'K' => b[c0x88(file, rank)] = pieces::BKING,
+                ' ' => break,
+                _ => panic!("Invalid character {} in FEN at position {}", c, i),
+            }
+            file += 1;
+        }
+
+        // Side to move
+        let fen = fen[str_pos+1 ..].trim();
+        b.side_to_move = match fen.chars().nth(0).expect("FEN too short") {
+            'w' => WHITE,
+            'b' => BLACK,
+            wildcard => panic!("Invalid side to move {} (i = {}", wildcard, str_pos + 1),
+        };
+
+        // Castling
+        let fen = fen[1..].trim();
+        str_pos = 0;
+        for (i,c) in fen.chars().enumerate() {
+            str_pos = i;
+            match c {
+                ' ' => break,
+                '_' => break,
+                'k' => b.castling[CR_KING + 0],
+                'K' => b.castling[CR_KING + 1],
+                'q' => b.castling[CR_QUEEN + 0],
+                'Q' => b.castling[CR_QUEEN + 1],
+                _ => panic!("Invalid castling rights {}", c),
+            };
+        }
+
+        // Enpassant
+        let fen = fen[str_pos..].trim();
+        let mut iter = fen.chars();
+        match iter.nth(0).expect("Fen too short") {
+            '-' => {},
+            'a'..='h' => {
+                let file = iter.nth(0).unwrap() as isize - 'a' as isize;
+                let rank = iter.nth(1).unwrap() as isize - '1' as isize;
+                b.en_passant = Some(match rank {
+                    2 => c0x88(file, 3),
+                    5 => c0x88(file, 4),
+                    _ => panic!("Wrong ep rank in fen!"),
+                });
+            }
+            _ => panic!("Invalid enpassant"),
+        }
+
+        // TODO: halfmove and fullmove counter
+
 
         return b;
     }
