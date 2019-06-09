@@ -182,7 +182,12 @@ impl TransTable {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
             match self.get_actual(zob, key & self.len) {
-                GetState::Ok(t) => { return Some(t); },
+                GetState::Ok(t) => { 
+                    return match t.node_type {
+                        search::NodeType::None => None,
+                        _ => Some(t),
+                    }
+                },
                 GetState::Occupied => { continue; },
                 GetState::Abort => { return None; },
             };
