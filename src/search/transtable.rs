@@ -208,8 +208,27 @@ impl TransTable {
     }
 
     pub fn get_pv(&self, b: &mut board::Board) -> Vec<board::Move> {
-        // TODO: get PV from TT
-        return vec![self.get(b.zobrist).expect("No TT entry for root!").get_move().expect("No best move in TT root entry")];
+        let mut pv = Vec::new();
+
+        loop {
+            match self.get(b.zobrist) {
+                Some(tte) => match tte.get_move() {
+                    Some(m) => {
+                        pv.push(m);
+                        b.make(&m);
+                    }
+                    None => break,
+                }
+                None => break,
+            }
+        }
+
+        for _ in 0..pv.len() {
+            b.unmake();
+        }
+        pv.reverse();
+
+        return pv;
     }
 }
 
