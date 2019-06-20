@@ -13,7 +13,10 @@ It can also be ran with `cargo run --release` or the binaries on the Releases pa
 fe_chess currently only has a simple built-in shell that is not compatible with uci. Type `help` to get a list of command. (UCI not functional).
 
 # Changelog
-## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.4.0...master)
+## [master](https://github.com/ColonelPhantom/fe_chess/compare/v0.5.0...master)
+## [v0.5.0](https://github.com/ColonelPhantom/fe_chess/compare/v0.4.0...v0.5.0)
+* Add late-move-reduction to search moves that are considered worse by move ordering to a lesser depth
+* Reimplement principal variation based on the transposition table
 ## [v0.4.0](https://github.com/ColonelPhantom/fe_chess/compare/v0.3.0...v0.4.0)
 * Add quiescence move ordering
 * Increase standard search depth to 6

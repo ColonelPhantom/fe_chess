@@ -152,7 +152,7 @@ dependencies = [
 
 [[package]]
 name = "fe_chess"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "shrust 0.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
