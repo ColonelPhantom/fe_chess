@@ -27,15 +27,7 @@ pub fn quiesce(
         None => {
             sp = sign * eval(b);
             stand_pat = Score::Value(sp);
-            tt.put(
-                b.zobrist,
-                None,
-                -qdepth,
-                stand_pat,
-                super::NodeType::QuiesceEval,
-                beta,
-                Some(sp),
-            );
+            tt.put(b.zobrist, None, -qdepth, stand_pat, super::NodeType::QuiesceEval, beta, Some(sp), false);
         }
         Some(tt_entry) => match tt_entry.node_type {
             NodeType::QuiesceEval => {
@@ -109,16 +101,8 @@ pub fn quiesce(
         let score = -quiesce(b, -beta, -alpha, qdepth + 1, tt);
         b.unmake();
 
-        if score >= beta {
-            tt.put(
-                b.zobrist,
-                Some(m),
-                -qdepth,
-                score,
-                super::NodeType::QuiesceCut,
-                beta,
-                Some(sp),
-            );
+        if score >= beta  {
+            tt.put(b.zobrist, Some(m), -qdepth, score, super::NodeType::QuiesceCut, beta, Some(sp), false);
             return beta;
         }
         
@@ -131,15 +115,7 @@ pub fn quiesce(
         }
     }
 
-    tt.put(
-        b.zobrist,
-        None,
-        -qdepth,
-        local_alpha,
-        NodeType::QuiesceFull,
-        beta,
-        Some(sp),
-    );
+    tt.put(b.zobrist, None, -qdepth, local_alpha, NodeType::QuiesceFull, beta, Some(sp), false);
 
     return local_alpha;
 }

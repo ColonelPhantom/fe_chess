@@ -10,13 +10,9 @@ use super::SearchInfoIntm;
 
 const NODES_REDUCE: [usize; 6] = [2, 4, 8, 16, 32, 64];
 
-pub fn alpha_beta(
-    b: &mut Board,
-    mut alpha: Score,
-    beta: Score,
-    depthleft: usize,
-    tt: &mut TransTable,
-) -> SearchInfoIntm {
+pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable, aspiration: bool)
+ -> SearchInfoIntm
+{
     let mut local_alpha = Score::Loss(0);
     let mut best_move: Option<board::Move> = None;
     let mut nodes = 1;
@@ -63,7 +59,7 @@ pub fn alpha_beta(
                                 score: tt_entry.eval_score,
                                 nodes,
                             };
-                        } else {
+                        } else if !tt_entry.aspiration {
                             local_alpha = tt_entry.eval_score;
                             if local_alpha > alpha {
                                 alpha = local_alpha;
@@ -139,7 +135,7 @@ pub fn alpha_beta(
             b.unmake();
             continue;
         }
-        let si = alpha_beta(b, -beta, -alpha, (depthleft - 1) - lmr_reduction, tt);
+        let si = alpha_beta(b, -beta, -alpha, (depthleft - 1) - lmr_reduction, tt, aspiration);
         let score_lmr = match -si.score {
             Score::Win(d) => Score::Win(d + 1),
             Score::Loss(d) => Score::Loss(d + 1),
@@ -149,9 +145,8 @@ pub fn alpha_beta(
         nodes += si.nodes;
 
         let score;
-        if lmr_reduction > 0 && (score_lmr >= beta || score_lmr > alpha || score_lmr > local_alpha)
-        {
-            let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
+        if lmr_reduction > 0 && (score_lmr >= beta || score_lmr > alpha || score_lmr > local_alpha) {
+            let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt, aspiration);
             score = match -si.score {
                 Score::Win(d) => Score::Win(d + 1),
                 Score::Loss(d) => Score::Loss(d + 1),
@@ -168,16 +163,11 @@ pub fn alpha_beta(
 
         if score >= beta {
             // Store self move in TT, move field is refutation move
-            tt.put(
-                b.zobrist,
-                Some(m),
-                depthleft as i16,
-                score,
-                NodeType::CutNode,
-                beta,
-                Some(eval),
-            );
-            return SearchInfoIntm { score: beta, nodes };
+            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, Some(eval), aspiration);
+            return SearchInfoIntm {
+                score: beta,
+                nodes,
+            };
         }
         if score > alpha {
             // Remember this move to be stored in TT
@@ -190,26 +180,9 @@ pub fn alpha_beta(
         }
     }
 
-    match !(local_alpha < alpha) {
-        // match alpha_raised
-        false => tt.put(
-            b.zobrist,
-            best_move,
-            depthleft as i16,
-            local_alpha,
-            NodeType::AllNode,
-            beta,
-            Some(eval),
-        ),
-        true => tt.put(
-            b.zobrist,
-            best_move,
-            depthleft as i16,
-            local_alpha,
-            NodeType::PvNode,
-            beta,
-            Some(eval),
-        ),
+    match !(local_alpha < alpha) {  // match alpha_raised
+        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode, beta, Some(eval), aspiration),
+        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode, beta, Some(eval), aspiration),
     };
 
     return SearchInfoIntm {

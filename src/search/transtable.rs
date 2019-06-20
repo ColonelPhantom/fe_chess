@@ -82,6 +82,7 @@ pub struct TtEntry {
     pub node_type: search::NodeType,
     pub beta: search::Score,
     pub eval: Option<crate::eval::ValCp>,
+    pub aspiration: bool,
 }
 impl Default for TtEntry {
     fn default() -> Self {
@@ -93,6 +94,7 @@ impl Default for TtEntry {
             node_type: search::NodeType::None,
             beta: search::Score::Win(0),
             eval: None,
+            aspiration: false,
         }
     }
 }
@@ -141,18 +143,7 @@ impl TransTable {
         }
         return PutState::Ok;
     }
-
-    fn put_actual(
-        &mut self,
-        zob: u64,
-        key: u64,
-        m: Option<board::Move>,
-        depth: i16,
-        score: search::Score,
-        node_type: search::NodeType,
-        beta: search::Score,
-        eval: Option<crate::eval::ValCp>,
-    ) -> PutState {
+    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>, aspiration: bool) -> PutState {
         let e = self.t[key as usize];
         let action = self.should_overwrite(zob, &e, m, depth, node_type);
         match action {
@@ -168,6 +159,7 @@ impl TransTable {
                     node_type,
                     beta,
                     eval,
+                    aspiration,
                 };
             }
             _ => {}
@@ -176,22 +168,13 @@ impl TransTable {
 
         // No objections, so put the move in.
     }
-    pub fn put(
-        &mut self,
-        zob: u64,
-        m: Option<board::Move>,
-        depth: i16,
-        score: search::Score,
-        node_type: search::NodeType,
-        beta: search::Score,
-        eval: Option<crate::eval::ValCp>,
-    ) {
+    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>, aspiration: bool) {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
-            match self.put_actual(zob, key & self.len, m, depth, score, node_type, beta, eval) {
-                PutState::Ok => return,
-                PutState::Occupied => continue,
-                PutState::Abort => return,
+            match self.put_actual(zob, key & self.len, m, depth, score, node_type, beta, eval, aspiration) {
+                PutState::Ok => { return },
+                PutState::Occupied => { continue },
+                PutState::Abort => { return },
             }
         }
     }
