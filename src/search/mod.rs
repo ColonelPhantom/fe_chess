@@ -150,7 +150,7 @@ fn aspirate(b: &mut Board, depth: usize, tt: &mut transtable::TransTable, prev_i
         Score::Win(d) => Score::Win(std::cmp::max(d as i32 - 1, 0) as u16),
         Score::Loss(d) => Score::Loss(d + 1),
     };
-    println!("Alpha {}, beta {}, depth {}", alpha, beta, depth);
+    // println!("Alpha {}, beta {}, depth {}", alpha, beta, depth);
     let si = alphabeta::alpha_beta(b, alpha, beta, depth, tt, true);
     if si.score >= beta || si.score <= alpha {
         // Aspiration window failed; return full alphabeta
@@ -168,12 +168,10 @@ fn aspirate(b: &mut Board, depth: usize, tt: &mut transtable::TransTable, prev_i
 pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo
 {
     let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 0, tt, false);
-    println!("Post-search score: {}", si.score);
     let mut nodes = si.nodes;
     for d in 1..=depth {
         si = aspirate(b, d, tt, si);
         // si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, tt);
-        println!("Post-search score: {} from depth {}", si.score, d);
         nodes += si.nodes;
     }
     // let si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
