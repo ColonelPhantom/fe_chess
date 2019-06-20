@@ -134,7 +134,7 @@ pub struct SearchInfoIntm {
     pub nodes: u64,
 }
 
-const ASPIRATION_WIDTH: i16 = 100;
+const ASPIRATION_WIDTH: i16 = 50;
 
 fn aspirate(b: &mut Board, depth: usize, tt: &mut transtable::TransTable, prev_info: SearchInfoIntm) -> SearchInfoIntm {
     // TODO: fix aspiration and mate detection (move maybe correct, score wrong)
