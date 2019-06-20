@@ -72,6 +72,21 @@ pub fn main() {
     // println!("Sizeof Piece: {}", std::mem::size_of::<board::Piece>());
     // println!("Sizeof Coord0x88: {}", std::mem::size_of::<board::Coord0x88>());
     // println!("Sizeof EPState: {}", std::mem::size_of::<board::EnPassantState>());
+
+    let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    b.make(m);
+    let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    b.make(m);
+    let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    b.make(m);
+    let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    b.make(m);
+    let m = &search::search(&mut b, 6, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    b.make(m);
+    let m = &search::search(&mut b, 9, &mut search::transtable::TransTable::new(18)).pv.pop().expect("Did not get a move");
+    b.make(m);
+    println!("Board: {:x}", b.zobrist);
+
     
 
 }
