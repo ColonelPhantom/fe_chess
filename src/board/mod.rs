@@ -270,34 +270,7 @@ impl Board {
         let undo_castling;
 
         if captured.piece_type != PieceType::None {
-            let zob_tab = match captured.piece_type {
-                PieceType::Pawn => match self.side_to_move {
-                    WHITE => &zobrist::WPAWN,
-                    BLACK => &zobrist::BPAWN,
-                }
-                PieceType::Knight => match self.side_to_move {
-                    WHITE => &zobrist::WKNIGHT,
-                    BLACK => &zobrist::BKNIGHT,
-                }
-                PieceType::Bishop => match self.side_to_move {
-                    WHITE => &zobrist::WBISHOP,
-                    BLACK => &zobrist::BBISHOP,
-                }
-                PieceType::Rook => match self.side_to_move {
-                    WHITE => &zobrist::WROOK,
-                    BLACK => &zobrist::BROOK,
-                }
-                PieceType::Queen => match self.side_to_move {
-                    WHITE => &zobrist::WQUEEN,
-                    BLACK => &zobrist::BQUEEN,
-                }
-                PieceType::King => match self.side_to_move {
-                    WHITE => &zobrist::WKING,
-                    BLACK => &zobrist::BKING,
-                }
-                _ => panic!("Capture of unexpected piece type"),
-            };
-            self.zobrist ^= zob_tab[coord0x88_to8x8(cmove.to)];
+            self.zobrist_toggle(captured, coord0x88_to8x8(cmove.to));
         }
 
         if let Some(c) = cmove.castling {
@@ -306,22 +279,26 @@ impl Board {
             // Only handle rook movement and castling rights
             // King movement is handled by regular code
             let kc = self.king_pos[self.side_to_move as usize];
-            let zob_tab = match self.side_to_move {
-                WHITE => &zobrist::WROOK,
-                BLACK => &zobrist::BROOK,
+            // let zob_tab = match self.side_to_move {
+            //     WHITE => &zobrist::WROOK,
+            //     BLACK => &zobrist::BROOK,
+            // };
+            let zob_piece = match self.side_to_move {
+                WHITE => pieces::WROOK,
+                BLACK => pieces::BROOK,
             };
             match c {
                 CR_KING => {
                     self[kc + o0x88(1, 0)] = self[kc + o0x88(3, 0)];
                     self[kc + o0x88(3, 0)] = pieces::NONE;
-                    self.zobrist ^= zob_tab[coord0x88_to8x8(kc + o0x88(1, 0))];
-                    self.zobrist ^= zob_tab[coord0x88_to8x8(kc + o0x88(3, 0))];
+                    self.zobrist_toggle(zob_piece, coord0x88_to8x8(kc + o0x88(1, 0)));
+                    self.zobrist_toggle(zob_piece, coord0x88_to8x8(kc + o0x88(3, 0)));
                 }
                 CR_QUEEN => {
                     self[kc + o0x88(-1, 0)] = self[kc + o0x88(-4, 0)];
                     self[kc + o0x88(-4, 0)] = pieces::NONE;
-                    self.zobrist ^= zob_tab[coord0x88_to8x8(kc + o0x88(-1, 0))];
-                    self.zobrist ^= zob_tab[coord0x88_to8x8(kc + o0x88(-4, 0))];
+                    self.zobrist_toggle(zob_piece, coord0x88_to8x8(kc + o0x88(-1, 0)));
+                    self.zobrist_toggle(zob_piece, coord0x88_to8x8(kc + o0x88(-4, 0)));
                 }
                 _ => panic!("Castling not with value CR_KING or CR_QUEEN")
             }
@@ -331,7 +308,7 @@ impl Board {
 
         if self.en_passant.is_some() {
             undo_ep = EnPassantState::Possible(self.en_passant.unwrap());
-            self.zobrist ^= zobrist::ENPASSANT[self.en_passant.unwrap().0 & 0x7];
+            self.zobrist_toggle_ep(self.en_passant.unwrap());
         }
 
         match cmove.en_passant {
@@ -340,7 +317,7 @@ impl Board {
             }
             EnPassantState::Possible(c) => {
                 self.en_passant = Some(c);
-                self.zobrist ^= zobrist::ENPASSANT[c.0 & 0x7];
+                self.zobrist_toggle_ep(c);
             }
             EnPassantState::Capture(c) => {
                 self[c] = pieces::NONE;
@@ -360,11 +337,11 @@ impl Board {
         if self[cmove.from].piece_type == PieceType::King {
             if self.castling[CR_KING + self.side_to_move as usize] {
                 self.castling[CR_KING + self.side_to_move as usize] = false;
-                self.zobrist ^= zobrist::CASTLING[CR_KING + self.side_to_move as usize];
+                self.zobrist_toggle_castle(CR_KING, self.side_to_move);
             }
             if self.castling[CR_QUEEN + self.side_to_move as usize] {
                 self.castling[CR_QUEEN + self.side_to_move as usize] = false;
-                self.zobrist ^= zobrist::CASTLING[CR_QUEEN + self.side_to_move as usize];
+                self.zobrist_toggle_castle(CR_QUEEN, self.side_to_move);
             }
             // Update kingpos
             self.king_pos[self.side_to_move as usize] = cmove.to;
@@ -374,19 +351,19 @@ impl Board {
             match cmove.from {
                 c0x88::a1 => if self.castling[CR_QUEEN + WHITE as usize] { 
                    self.castling[CR_QUEEN + WHITE as usize] = false;
-                   self.zobrist ^= zobrist::CASTLING[CR_QUEEN + WHITE as usize];
+                   self.zobrist_toggle_castle(CR_QUEEN, WHITE);
                 },
                 c0x88::h1 => if self.castling[CR_KING + WHITE as usize] { 
-                   self.castling[CR_KING + WHITE as usize] = false;
-                   self.zobrist ^= zobrist::CASTLING[CR_KING + WHITE as usize];
+                    self.castling[CR_KING + WHITE as usize] = false;
+                    self.zobrist_toggle_castle(CR_KING, WHITE);
                 },
                 c0x88::a8 => if self.castling[CR_QUEEN + BLACK as usize] { 
                    self.castling[CR_QUEEN + BLACK as usize] = false;
-                   self.zobrist ^= zobrist::CASTLING[CR_QUEEN + BLACK as usize];
+                   self.zobrist_toggle_castle(CR_QUEEN, BLACK);
                 },
                 c0x88::h8 => if self.castling[CR_KING + BLACK as usize] { 
                    self.castling[CR_KING + BLACK as usize] = false;
-                   self.zobrist ^= zobrist::CASTLING[CR_KING + BLACK as usize];
+                   self.zobrist_toggle_castle(CR_KING, BLACK);
                 },
                 _ => {}
 
@@ -395,69 +372,21 @@ impl Board {
 
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
-            self[cmove.to] = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
+            let new_piece = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
+
+            self.zobrist_toggle(self[cmove.from], coord0x88_to8x8(cmove.from));
+            self.zobrist_toggle(new_piece, coord0x88_to8x8(cmove.to));
+
+            self[cmove.to] = new_piece;
             self[cmove.from] = pieces::NONE;
 
-            use PieceType::*;
-            let zob_from_tab = match self.side_to_move {
-                WHITE => &zobrist::WPAWN,
-                BLACK => &zobrist::BPAWN,
-            };
-            let zob_to_tab = match cmove.promote_to {
-                Knight => match self.side_to_move {
-                    WHITE => &zobrist::WKNIGHT,
-                    BLACK => &zobrist::BKNIGHT,
-                }
-                Bishop => match self.side_to_move {
-                    WHITE => &zobrist::WBISHOP,
-                    BLACK => &zobrist::BBISHOP,
-                }
-                Rook => match self.side_to_move {
-                    WHITE => &zobrist::WROOK,
-                    BLACK => &zobrist::BROOK,
-                }
-                Queen => match self.side_to_move {
-                    WHITE => &zobrist::WQUEEN,
-                    BLACK => &zobrist::BQUEEN,
-                }
-                _ => panic!("invalid promotion"),
-            };
-            self.zobrist ^= zob_from_tab[coord0x88_to8x8(cmove.from)];
-            self.zobrist ^= zob_to_tab[coord0x88_to8x8(cmove.to)];
             promoted = true;
 
         } else { // Non-promoting move: business as usual
-            let zob_tab = match self[cmove.from].piece_type {
-                PieceType::Pawn => match self.side_to_move {
-                    WHITE => &zobrist::WPAWN,
-                    BLACK => &zobrist::BPAWN,
-                }
-                PieceType::Knight => match self.side_to_move {
-                    WHITE => &zobrist::WKNIGHT,
-                    BLACK => &zobrist::BKNIGHT,
-                }
-                PieceType::Bishop => match self.side_to_move {
-                    WHITE => &zobrist::WBISHOP,
-                    BLACK => &zobrist::BBISHOP,
-                }
-                PieceType::Rook => match self.side_to_move {
-                    WHITE => &zobrist::WROOK,
-                    BLACK => &zobrist::BROOK,
-                }
-                PieceType::Queen => match self.side_to_move {
-                    WHITE => &zobrist::WQUEEN,
-                    BLACK => &zobrist::BQUEEN,
-                }
-                PieceType::King => match self.side_to_move {
-                    WHITE => &zobrist::WKING,
-                    BLACK => &zobrist::BKING,
-                }
-                _ => panic!("Attempting to move a non-piece")
-            };
+            self.zobrist_toggle(self[cmove.from], coord0x88_to8x8(cmove.from));
+            self.zobrist_toggle(self[cmove.from], coord0x88_to8x8(cmove.to));
             self[cmove.to] = self[cmove.from];
             self[cmove.from] = pieces::NONE;
-            self.zobrist ^= zob_tab[coord0x88_to8x8(cmove.from)];
-            self.zobrist ^= zob_tab[coord0x88_to8x8(cmove.to)];
             promoted = false;
         }
 
@@ -483,7 +412,7 @@ impl Board {
 
         // Update 'trivial' field(s)
         self.side_to_move = !self.side_to_move;
-        self.zobrist ^= zobrist::SIDE_TO_MOVE;
+        self.zobrist_toggle_side();
     }
     
     pub fn unmake(&mut self) {
@@ -629,46 +558,6 @@ impl Board {
             }
             Some(x) => x.clone()
         }
-    }
-
-    pub fn zobrist_init(&self) -> u64 {
-        let mut z: u64 = 0;
-        for file in 0..8 {
-            for rank in 0..8 {
-                use pieces::*;
-                let c = c0x88(file, rank);
-                z ^= match self[c] {
-                    NONE => 0,
-                    WPAWN => zobrist::WPAWN[c8x8(file, rank)],
-                    WKNIGHT => zobrist::WKNIGHT[c8x8(file, rank)],
-                    WBISHOP => zobrist::WBISHOP[c8x8(file, rank)],
-                    WROOK => zobrist::WROOK[c8x8(file, rank)],
-                    WQUEEN => zobrist::WQUEEN[c8x8(file, rank)],
-                    WKING => zobrist::WKING[c8x8(file, rank)],
-                    BPAWN => zobrist::BPAWN[c8x8(file, rank)],
-                    BKNIGHT => zobrist::BKNIGHT[c8x8(file, rank)],
-                    BBISHOP => zobrist::BBISHOP[c8x8(file, rank)],
-                    BROOK => zobrist::BROOK[c8x8(file, rank)],
-                    BQUEEN => zobrist::BQUEEN[c8x8(file, rank)],
-                    BKING => zobrist::BKING[c8x8(file, rank)],
-                    _ => 0,
-                }
-            }
-        }
-        z ^= match self.side_to_move {
-            WHITE => 0,
-            BLACK => zobrist::SIDE_TO_MOVE,
-        };
-        if self.en_passant.is_some() {
-            z ^= zobrist::ENPASSANT[self.en_passant.unwrap().0 & 7];
-        }
-        for cr in 0..4 {
-            if self.castling[cr] {
-                z ^= zobrist::CASTLING[cr];
-            }
-        }
-
-        return z;
     }
 }
 impl std::ops::Index<Coord0x88> for Board {
