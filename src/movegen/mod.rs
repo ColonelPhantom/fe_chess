@@ -198,9 +198,9 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
                         b.castling[CR_KING + b.side_to_move as usize] &&
                         !b.occupied(kc + o0x88(1, 0)) &&
                         !b.occupied(kc + o0x88(2, 0)) &&
-                        b.is_check(b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(1, 0), b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(2, 0), b.side_to_move) == ThreatInfo::Safe
+                        b.is_check(b.side_to_move).is_safe() &&
+                        b.under_attack(kc + o0x88(1, 0), b.side_to_move).is_safe() &&
+                        b.under_attack(kc + o0x88(2, 0), b.side_to_move).is_safe()
                 {
                     moves.push( Move {
                         from: c,
@@ -216,9 +216,9 @@ pub fn movegen(b: &mut Board) -> Vec<Move> {
                         !b.occupied(kc + o0x88(-1, 0)) &&
                         !b.occupied(kc + o0x88(-2, 0)) &&
                         !b.occupied(kc + o0x88(-3, 0)) &&
-                        b.is_check(b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(-1, 0), b.side_to_move) == ThreatInfo::Safe &&
-                        b.under_attack(kc + o0x88(-2, 0), b.side_to_move) == ThreatInfo::Safe
+                        b.is_check(b.side_to_move).is_safe() &&
+                        b.under_attack(kc + o0x88(-1, 0), b.side_to_move) .is_safe() &&
+                        b.under_attack(kc + o0x88(-2, 0), b.side_to_move) .is_safe()
                 {
                     moves.push( Move {
                         from: c,
