@@ -54,7 +54,7 @@ pub fn move_priority(m: &board::Move, b: &mut board::Board, tt: &TransTable, bas
     let check_bonus = CHECK_BONUS * match b.is_check(b.side_to_move) {
         board::ThreatInfo::Safe => 0,
         board::ThreatInfo::Single(_c) => 1,
-        board::ThreatInfo::Multiple(v) => v.len() as i32,
+        board::ThreatInfo::Multiple(v) => 1 + v.len() as i32,
     };
     b.unmake();
     // let static_eval_score = 0;
