@@ -22,6 +22,12 @@ pub fn main() {
     shell.new_command_noargs("perft", "Perform a perft() test", |_,_| { super::perft::main(); Ok(())});
     shell.new_command_noargs("test", "Runs a predetermined test routine", |_,_| { super::test::main(); Ok(())});
 
+    shell.new_command("fromfen", "Reinit board from a FEN string", 1, |_,s,a| {
+        s.board = board::Board::from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+
+        Ok(())
+    });
+
     shell.new_command_noargs("print", "Prints the current board", |_,s| { super::print_board(&s.board); Ok(())});
     shell.new_command_noargs("undo", "Undoes the most recent move", |_,s| { s.board.unmake(); s.thought = None; Ok(())});
 
