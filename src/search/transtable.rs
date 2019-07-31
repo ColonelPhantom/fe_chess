@@ -130,9 +130,8 @@ impl TransTable {
             }
         }
         return PutState::Ok;
-
-
     }
+    
     fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>) -> PutState {
         let e = self.t[key as usize];
         let action = self.should_overwrite(zob, &e, m, depth, node_type);
