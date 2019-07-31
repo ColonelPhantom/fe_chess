@@ -277,6 +277,27 @@ impl Board {
             }
         }
 
+        // Remove castling rights when rook is captured
+        match cmove.to {
+            c0x88::a1 => if self.castling[CR_QUEEN + WHITE as usize] { 
+                self.castling[CR_QUEEN + WHITE as usize] = false;
+                self.zobrist_toggle_castle(CR_QUEEN, WHITE);
+            },
+            c0x88::h1 => if self.castling[CR_KING + WHITE as usize] { 
+                self.castling[CR_KING + WHITE as usize] = false;
+                self.zobrist_toggle_castle(CR_KING, WHITE);
+            },
+            c0x88::a8 => if self.castling[CR_QUEEN + BLACK as usize] { 
+                self.castling[CR_QUEEN + BLACK as usize] = false;
+                self.zobrist_toggle_castle(CR_QUEEN, BLACK);
+            },
+            c0x88::h8 => if self.castling[CR_KING + BLACK as usize] { 
+                self.castling[CR_KING + BLACK as usize] = false;
+                self.zobrist_toggle_castle(CR_KING, BLACK);
+            },
+            _ => {}
+        }
+
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
             let new_piece = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
