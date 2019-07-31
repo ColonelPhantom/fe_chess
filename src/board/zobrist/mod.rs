@@ -6,27 +6,27 @@ pub fn get_zob_piece_square(p: super::Piece, coord: super::Coord8x8) -> u64 {
         PieceType::Pawn => match p.color {
             WHITE => &defs::WPAWN,
             BLACK => &defs::BPAWN,
-        }
+        },
         PieceType::Knight => match p.color {
             WHITE => &defs::WKNIGHT,
             BLACK => &defs::BKNIGHT,
-        }
+        },
         PieceType::Bishop => match p.color {
             WHITE => &defs::WBISHOP,
             BLACK => &defs::BBISHOP,
-        }
+        },
         PieceType::Rook => match p.color {
             WHITE => &defs::WROOK,
             BLACK => &defs::BROOK,
-        }
+        },
         PieceType::Queen => match p.color {
             WHITE => &defs::WQUEEN,
             BLACK => &defs::BQUEEN,
-        }
+        },
         PieceType::King => match p.color {
             WHITE => &defs::WKING,
             BLACK => &defs::BKING,
-        }
+        },
         _ => panic!("Capture of unexpected piece type"),
     }[coord];
 }
@@ -36,7 +36,7 @@ impl super::Board {
         let mut z: u64 = 0;
         for file in 0..8 {
             for rank in 0..8 {
-                use super::{c0x88,c8x8, pieces::*};
+                use super::{c0x88, c8x8, pieces::*};
                 let c = c0x88(file, rank);
                 z ^= match self[c] {
                     NONE => 0,

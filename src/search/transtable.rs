@@ -60,7 +60,7 @@ impl MoveCompact {
         let castling = match self.castling {
             255 => None,
             0..=3 => Some(self.castling as usize),
-            _ => panic!("Invalid castling. Value: {}", self.castling)
+            _ => panic!("Invalid castling. Value: {}", self.castling),
         };
         use std::num::Wrapping;
         Some(board::Move {
@@ -95,7 +95,7 @@ impl Default for TtEntry {
             eval: None,
         }
     }
-} 
+}
 impl TtEntry {
     pub fn get_move(&self) -> Option<board::Move> {
         return self.first_move.to_move();
@@ -112,10 +112,20 @@ impl TransTable {
         let len = 2usize.pow(size);
         let mut t = Vec::with_capacity(len);
         t.resize(len, TtEntry::default());
-        Self {t, len: len as u64 - 1}
+        Self {
+            t,
+            len: len as u64 - 1,
+        }
     }
 
-    fn should_overwrite(&mut self, zob: u64, e: &TtEntry, _m: Option<board::Move>, depth: i16, _node_type: search::NodeType) -> PutState {
+    fn should_overwrite(
+        &mut self,
+        zob: u64,
+        e: &TtEntry,
+        _m: Option<board::Move>,
+        depth: i16,
+        _node_type: search::NodeType,
+    ) -> PutState {
         if e.depthleft < 0 {
             // Always overwrite quiesce entries
             return PutState::Ok;
@@ -131,8 +141,18 @@ impl TransTable {
         }
         return PutState::Ok;
     }
-    
-    fn put_actual(&mut self, zob: u64, key: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>) -> PutState {
+
+    fn put_actual(
+        &mut self,
+        zob: u64,
+        key: u64,
+        m: Option<board::Move>,
+        depth: i16,
+        score: search::Score,
+        node_type: search::NodeType,
+        beta: search::Score,
+        eval: Option<crate::eval::ValCp>,
+    ) -> PutState {
         let e = self.t[key as usize];
         let action = self.should_overwrite(zob, &e, m, depth, node_type);
         match action {
@@ -156,13 +176,22 @@ impl TransTable {
 
         // No objections, so put the move in.
     }
-    pub fn put(&mut self, zob: u64, m: Option<board::Move>, depth: i16, score: search::Score, node_type: search::NodeType, beta: search::Score, eval: Option<crate::eval::ValCp>) {
+    pub fn put(
+        &mut self,
+        zob: u64,
+        m: Option<board::Move>,
+        depth: i16,
+        score: search::Score,
+        node_type: search::NodeType,
+        beta: search::Score,
+        eval: Option<crate::eval::ValCp>,
+    ) {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
             match self.put_actual(zob, key & self.len, m, depth, score, node_type, beta, eval) {
-                PutState::Ok => { return },
-                PutState::Occupied => { continue },
-                PutState::Abort => { return },
+                PutState::Ok => return,
+                PutState::Occupied => continue,
+                PutState::Abort => return,
             }
         }
     }
@@ -181,16 +210,14 @@ impl TransTable {
         for i in &HASH_SHIFTS {
             let key = zob >> i;
             match self.get_actual(zob, key & self.len) {
-                GetState::Ok(t) => { 
-                    return match t.node_type {
-                        search::NodeType::None => None,
-                        _ => Some(t),
-                    }
+                GetState::Ok(t) => return match t.node_type {
+                    search::NodeType::None => None,
+                    _ => Some(t),
                 },
-                GetState::Occupied => { continue; },
-                GetState::Abort => { return None; },
+                GetState::Occupied => continue,
+                GetState::Abort => return None,
             };
-        };
+        }
         // No entry found.
         return None;
     }
@@ -217,7 +244,7 @@ impl TransTable {
                         b.make(&m);
                     }
                     None => break,
-                }
+                },
                 None => break,
             }
         }

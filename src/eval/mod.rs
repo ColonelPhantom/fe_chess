@@ -24,7 +24,7 @@ fn mobil_eval(b: &Board, _p: &Piece, from: Coord0x88, offset: Coord0x88) -> ValC
             break;
         }
         c += offset;
-    };
+    }
     return count;
 }
 
@@ -97,10 +97,10 @@ pub fn eval(b: &mut Board) -> ValCp {
                     let pairbonus = bishop_present[p.color as usize] as ValCp * BISHOP_PAIR_BONUS;
                     bishop_present[p.color as usize] = true;
                     BISHOP_VAL + pairbonus + pst::BISHOP[lookup_c]
-                },
+                }
                 PieceType::Rook => ROOK_VAL + pst::ROOK[lookup_c],
                 PieceType::Queen => QUEEN_VAL + pst::QUEEN[lookup_c],
-                PieceType::King => KING_VAL + pst::KING_MID[lookup_c],  // TODO: taper the eval or something.
+                PieceType::King => KING_VAL + pst::KING_MID[lookup_c], // TODO: taper the eval or something.
                 //PieceType::Any => 0,
             } * p_sign;
             score += p_score + mobility_score;

@@ -1,14 +1,18 @@
 use crate::board;
 
 pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> crate::eval::ValCp {
-    let att = b.under_attack(sq, !side);    // Who of us can attack the opponent in sq?
+    let att = b.under_attack(sq, !side); // Who of us can attack the opponent in sq?
+    
     // Get the least valuable attacker
     let lva = match att {
-        board::ThreatInfo::Safe => {return 0;}, 
+        board::ThreatInfo::Safe => {
+            return 0;
+        }
         board::ThreatInfo::Single(a) => a,
         board::ThreatInfo::Multiple(mut va) => {
-            va.sort_unstable_by(|c1,c2| {
-                crate::eval::piece_val(b[*c1].piece_type).cmp(&crate::eval::piece_val(b[*c2].piece_type))
+            va.sort_unstable_by(|c1, c2| {
+                crate::eval::piece_val(b[*c1].piece_type)
+                    .cmp(&crate::eval::piece_val(b[*c2].piece_type))
             });
             *va.first().unwrap()
         }
@@ -17,7 +21,10 @@ pub fn see(b: &mut board::Board, sq: board::Coord0x88, side: board::Side) -> cra
     // TODO: make see consider pawn promotion
 
     b.make(&board::Move::new(lva, sq));
-    let value = std::cmp::max(0, crate::eval::piece_val(b[sq].piece_type) - see(b, sq, !side));
+    let value = std::cmp::max(
+        0,
+        crate::eval::piece_val(b[sq].piece_type) - see(b, sq, !side),
+    );
     b.unmake();
 
     return value;
@@ -29,5 +36,4 @@ pub fn see_capt(b: &mut board::Board, m: &board::Move, side: board::Side) -> cra
     let value = captured - see(b, m.to, !side);
     b.unmake();
     return value;
-
 }

@@ -1,7 +1,7 @@
-pub mod uci;
-pub mod perft;
 pub mod interactive;
+pub mod perft;
 pub mod test;
+pub mod uci;
 
 use crate::*;
 
@@ -20,8 +20,12 @@ pub fn print_board(b: &board::Board) {
                 _ => ' ',
             };
             match p.color {
-                board::WHITE => { t.make_ascii_lowercase(); }
-                board::BLACK => { t.make_ascii_uppercase(); }
+                board::WHITE => {
+                    t.make_ascii_lowercase();
+                }
+                board::BLACK => {
+                    t.make_ascii_uppercase();
+                }
             }
             print!("{}", t);
         }
@@ -29,4 +33,3 @@ pub fn print_board(b: &board::Board) {
     }
     //println!("Kingpos: {:02x}, {:02x}", b.king_pos[board::WHITE as usize], b.king_pos[board::BLACK as usize]);
 }
-

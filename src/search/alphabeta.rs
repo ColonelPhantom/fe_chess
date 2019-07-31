@@ -1,18 +1,22 @@
-use crate::movegen;
 use crate::board;
+use crate::movegen;
 use board::Board;
 
 use super::quiesce::quiesce;
-use super::SearchInfoIntm;
-use super::Score;
 use super::transtable::TransTable;
 use super::NodeType;
+use super::Score;
+use super::SearchInfoIntm;
 
 const NODES_REDUCE: [usize; 6] = [2, 4, 8, 16, 32, 64];
 
-pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize, tt: &mut TransTable)
- -> SearchInfoIntm
-{
+pub fn alpha_beta(
+    b: &mut Board,
+    mut alpha: Score,
+    beta: Score,
+    depthleft: usize,
+    tt: &mut TransTable,
+) -> SearchInfoIntm {
     let mut local_alpha = Score::Loss(0);
     let mut best_move: Option<board::Move> = None;
     let mut nodes = 1;
@@ -22,9 +26,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
     }
 
     if depthleft == 0 {
-        return SearchInfoIntm{
+        return SearchInfoIntm {
             score: quiesce(b, alpha, beta, 1, tt),
-            nodes: 1
+            nodes: 1,
         };
     }
 
@@ -40,7 +44,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                 board::WHITE => 1,
                 board::BLACK => -1,
             };
-        },
+        }
         Some(tt_entry) => {
             match tt_entry.node_type {
                 NodeType::None => panic!("Tt.get returned some but type is None"),
@@ -55,9 +59,9 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     // TODO: use decided position even when insufficient depth
                     if tt_entry.depthleft >= depthleft as i16 {
                         if beta <= tt_entry.beta {
-                            return SearchInfoIntm{
+                            return SearchInfoIntm {
                                 score: tt_entry.eval_score,
-                                nodes
+                                nodes,
                             };
                         } else {
                             local_alpha = tt_entry.eval_score;
@@ -76,7 +80,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
                     if tt_entry.depthleft >= depthleft as i16 && tt_entry.eval_score >= beta {
                         return SearchInfoIntm {
                             score: tt_entry.eval_score,
-                            nodes
+                            nodes,
                         };
                     } else {
                         eval = tt_entry.eval.unwrap();
@@ -94,9 +98,7 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
     // Sort decending by priority given
     if depthleft > 1 {
-        moves.sort_by_cached_key(|m| {
-            -super::moveord::move_priority(m, b, tt, baseline_eval, tt_e)
-        });
+        moves.sort_by_cached_key(|m| -super::moveord::move_priority(m, b, tt, baseline_eval, tt_e));
     }
 
     // Late move reduction
@@ -108,12 +110,12 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             return SearchInfoIntm {
                 score: Score::Loss(0),
                 nodes,
-            }
+            };
         } else {
             return SearchInfoIntm {
                 score: Score::Draw,
                 nodes,
-            }
+            };
         }
     }
 
@@ -129,19 +131,20 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
         }
         let si = alpha_beta(b, -beta, -alpha, (depthleft - 1) - lmr_reduction, tt);
         let score_lmr = match -si.score {
-            Score::Win(d) => Score::Win(d+1),
-            Score::Loss(d) => Score::Loss(d+1),
+            Score::Win(d) => Score::Win(d + 1),
+            Score::Loss(d) => Score::Loss(d + 1),
             Score::Value(p) => Score::Value(p),
             Score::Draw => Score::Draw,
         };
         nodes += si.nodes;
 
         let score;
-        if lmr_reduction > 0 && (score_lmr >= beta || score_lmr > alpha || score_lmr > local_alpha) {
+        if lmr_reduction > 0 && (score_lmr >= beta || score_lmr > alpha || score_lmr > local_alpha)
+        {
             let si = alpha_beta(b, -beta, -alpha, depthleft - 1, tt);
             score = match -si.score {
-                Score::Win(d) => Score::Win(d+1),
-                Score::Loss(d) => Score::Loss(d+1),
+                Score::Win(d) => Score::Win(d + 1),
+                Score::Loss(d) => Score::Loss(d + 1),
                 Score::Value(p) => Score::Value(p),
                 Score::Draw => Score::Draw,
             };
@@ -153,15 +156,20 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
 
         b.unmake();
 
-        if score >= beta  {
+        if score >= beta {
             // Store self move in TT, move field is refutation move
-            tt.put(b.zobrist, Some(m), depthleft as i16, score, NodeType::CutNode, beta, Some(eval));
-            return SearchInfoIntm {
-                score: beta,
-                nodes,
-            };
+            tt.put(
+                b.zobrist,
+                Some(m),
+                depthleft as i16,
+                score,
+                NodeType::CutNode,
+                beta,
+                Some(eval),
+            );
+            return SearchInfoIntm { score: beta, nodes };
         }
-        if score > alpha  {
+        if score > alpha {
             // Remember this move to be stored in TT
             best_move = Some(m.clone());
             alpha = score;
@@ -171,19 +179,40 @@ pub fn alpha_beta(b: &mut Board, mut alpha: Score, beta: Score, depthleft: usize
             local_alpha = score;
         }
         // LMR reduction update
-        if depthleft > 2 && lmr_reduction < NODES_REDUCE.len() && lmr_reduction < depthleft - 1 && nodes_searched >= NODES_REDUCE[lmr_reduction] {
+        if depthleft > 2
+            && lmr_reduction < NODES_REDUCE.len()
+            && lmr_reduction < depthleft - 1
+            && nodes_searched >= NODES_REDUCE[lmr_reduction]
+        {
             lmr_reduction += 1;
         }
         nodes_searched += 1;
     }
 
-    match !(local_alpha < alpha) {  // match alpha_raised
-        false => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::AllNode, beta, Some(eval)),
-        true => tt.put(b.zobrist, best_move, depthleft as i16, local_alpha, NodeType::PvNode, beta, Some(eval)),
+    match !(local_alpha < alpha) {
+        // match alpha_raised
+        false => tt.put(
+            b.zobrist,
+            best_move,
+            depthleft as i16,
+            local_alpha,
+            NodeType::AllNode,
+            beta,
+            Some(eval),
+        ),
+        true => tt.put(
+            b.zobrist,
+            best_move,
+            depthleft as i16,
+            local_alpha,
+            NodeType::PvNode,
+            beta,
+            Some(eval),
+        ),
     };
 
     return SearchInfoIntm {
         score: local_alpha,
-        nodes
-    }
+        nodes,
+    };
 }

@@ -1,5 +1,5 @@
-use std::num::Wrapping;
 use super::Coord0x88;
+use std::num::Wrapping;
 
 pub const a1: Coord0x88 = Wrapping(0x00);
 pub const b1: Coord0x88 = Wrapping(0x01);

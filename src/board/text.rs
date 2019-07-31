@@ -6,9 +6,10 @@ impl Move {
                 let from = b.king_pos[b.side_to_move as usize];
                 let to = from + o0x88(2, 0);
 
-                return Ok(Move{
+                return Ok(Move {
                     castling: Some(CR_KING),
-                    from, to,
+                    from,
+                    to,
 
                     en_passant: EnPassantState::None,
                     promote_to: PieceType::None,
@@ -18,9 +19,10 @@ impl Move {
                 let from = b.king_pos[b.side_to_move as usize];
                 let to = from + o0x88(-2, 0);
 
-                return Ok(Move{
+                return Ok(Move {
                     castling: Some(CR_QUEEN),
-                    from, to,
+                    from,
+                    to,
 
                     en_passant: EnPassantState::None,
                     promote_to: PieceType::None,
@@ -42,11 +44,11 @@ impl Move {
         let enp;
         let prom;
         if b[from].piece_type == PieceType::Pawn {
-            if ( to - from == o0x88(0, 2) ) || ( from - to == o0x88(0, 2) ) {
+            if (to - from == o0x88(0, 2)) || (from - to == o0x88(0, 2)) {
                 enp = EnPassantState::Possible(to);
-            } else if b.en_passant.is_some() &&
-                    (( b.en_passant.unwrap() == to + o0x88(0,  1)  && b.side_to_move == BLACK ) ||
-                     ( b.en_passant.unwrap() == to + o0x88(0, -1)  && b.side_to_move == WHITE ))
+            } else if b.en_passant.is_some()
+                && ((b.en_passant.unwrap() == to + o0x88(0, 1) && b.side_to_move == BLACK)
+                    || (b.en_passant.unwrap() == to + o0x88(0, -1) && b.side_to_move == WHITE))
             {
                 enp = EnPassantState::Capture(b.en_passant.unwrap());
             } else {
@@ -72,22 +74,28 @@ impl Move {
             prom = PieceType::None;
         }     
         
-        Ok(Move{
+        Ok(Move {
             castling: None,
-            en_passant:enp,
-            from, to,
-            promote_to: prom
+            en_passant: enp,
+            from,
+            to,
+            promote_to: prom,
         })
     }
-
 }
 impl std::fmt::Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}{}{}{}{}",
-            std::char::from_u32('a' as u32 + (self.from.0 & 0x7) as u32).expect("Error trying to turn move into text"),
-            std::char::from_u32('1' as u32 + ((self.from.0 >> 4) & 0x7) as u32).expect("Error trying to turn move into text"),
-            std::char::from_u32('a' as u32 + (self.to.0 & 0x7) as u32).expect("Error trying to turn move into text"),
-            std::char::from_u32('1' as u32 + ((self.to.0 >> 4) & 0x7) as u32).expect("Error trying to turn move into text"),
+        write!(
+            f,
+            "{}{}{}{}{}",
+            std::char::from_u32('a' as u32 + (self.from.0 & 0x7) as u32)
+                .expect("Error trying to turn move into text"),
+            std::char::from_u32('1' as u32 + ((self.from.0 >> 4) & 0x7) as u32)
+                .expect("Error trying to turn move into text"),
+            std::char::from_u32('a' as u32 + (self.to.0 & 0x7) as u32)
+                .expect("Error trying to turn move into text"),
+            std::char::from_u32('1' as u32 + ((self.to.0 >> 4) & 0x7) as u32)
+                .expect("Error trying to turn move into text"),
             match self.promote_to {
                 PieceType::Queen => 'q',
                 PieceType::Knight => 'n',
@@ -117,10 +125,10 @@ impl Board {
                     file = 0;
                     continue;
                 }
-                '1' ..= '8' => {
+                '1'..='8' => {
                     file += c.to_digit(10).unwrap() as isize;
                     continue;
-                },
+                }
                 'P' => b[c0x88(file, rank)] = pieces::WPAWN,
                 'N' => b[c0x88(file, rank)] = pieces::WKNIGHT,
                 'B' => b[c0x88(file, rank)] = pieces::WBISHOP,
@@ -146,7 +154,7 @@ impl Board {
         }
 
         // Side to move
-        let fen = fen[str_pos+1 ..].trim();
+        let fen = fen[str_pos + 1..].trim();
         println!("{}", fen);
         b.side_to_move = match fen.chars().nth(0).expect("FEN too short") {
             'w' => WHITE,
@@ -157,7 +165,7 @@ impl Board {
         // Castling
         let fen = fen[1..].trim();
         str_pos = 0;
-        for (i,c) in fen.chars().enumerate() {
+        for (i, c) in fen.chars().enumerate() {
             str_pos = i;
             match c {
                 ' ' => break,
@@ -173,7 +181,7 @@ impl Board {
         // Enpassant
         let fen = fen[str_pos..].trim();
         match fen.chars().nth(0).expect("Fen too short") {
-            '-' => {},
+            '-' => {}
             'a'..='h' => {
                 let file = fen.chars().nth(0).unwrap() as isize - 'a' as isize;
                 let rank = fen.chars().nth(1).unwrap() as isize - '1' as isize;
@@ -189,7 +197,6 @@ impl Board {
         // TODO: halfmove and fullmove counter
 
         b.zobrist = b.zobrist_init();
-
 
         return b;
     }

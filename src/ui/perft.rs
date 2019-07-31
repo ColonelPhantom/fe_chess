@@ -46,7 +46,7 @@ fn pretty_perft(b: &mut board::Board, depth: usize) -> usize {
 
 pub fn main() {
     let mut b = board::Board::new();
-    
+
     println!("Perft test, depth 1: {}", perft(&mut b, 1));
     println!("Perft test, depth 2: {}", perft(&mut b, 2));
     println!("Perft test, depth 3: {}", perft(&mut b, 3));

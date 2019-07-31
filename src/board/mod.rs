@@ -1,8 +1,8 @@
 use std::num::Wrapping;
 
-mod zobrist;
 mod text;
 mod threat;
+mod zobrist;
 pub use threat::ThreatInfo;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -18,7 +18,9 @@ pub enum PieceType {
     //Any = 7
 }
 impl Default for PieceType {
-    fn default() -> Self { PieceType::None }
+    fn default() -> Self {
+        PieceType::None
+    }
 }
 pub type Side = bool;
 pub const WHITE: Side = false;
@@ -26,7 +28,7 @@ pub const BLACK: Side = true;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Piece {
     pub piece_type: PieceType,
-    pub color: Side
+    pub color: Side,
 }
 pub mod pieces;
 
@@ -34,19 +36,21 @@ pub type Coord0x88 = std::num::Wrapping<usize>;
 pub type Coord8x8 = usize;
 
 // c0x88:h1 is a number now
-#[allow(non_upper_case_globals)] #[allow(dead_code)] pub mod c0x88;
+#[allow(non_upper_case_globals)]
+#[allow(dead_code)]
+pub mod c0x88;
 pub fn c0x88(file: isize, rank: isize) -> Coord0x88 {
-    Wrapping(16 * rank as usize) + Wrapping( file as usize )
+    Wrapping(16 * rank as usize) + Wrapping(file as usize)
 }
 
 pub fn c8x8(file: isize, rank: isize) -> Coord8x8 {
-    (8*rank + file) as usize
+    (8 * rank + file) as usize
 }
 
 // allow (-1, 1) format to determine offset from file and rank difference (same order as h5 but with ints)
 pub fn o0x88(file: isize, rank: isize) -> Coord0x88 {
     Wrapping(((rank * 0x10) + file) as usize)
-} 
+}
 
 pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
     (sq0x88.0 + (sq0x88.0 & 0x7)) >> 1
@@ -64,8 +68,8 @@ pub const CR_KING: usize = 0;
 #[derive(Debug, Clone, Copy)]
 pub enum EnPassantState {
     None,
-    Possible ( Coord0x88 ),
-    Capture ( Coord0x88 ),
+    Possible(Coord0x88),
+    Capture(Coord0x88),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -106,10 +110,8 @@ pub struct Unmove {
     pub zobrist: u64,
 }
 
-
-
 pub struct Board {
-    pub mailbox: [Piece; 128],      // 0x88
+    pub mailbox: [Piece; 128], // 0x88
     //pub bitboards: [u64; 16],
     pub unmake_stack: Vec<Unmove>,
     pub side_to_move: Side,
@@ -118,7 +120,7 @@ pub struct Board {
     pub king_pos: [Coord0x88; 2],
     check_cache: Option<ThreatInfo>,
     pub castling: CastlingRights,
-    pub zobrist: u64
+    pub zobrist: u64,
 }
 
 impl Board {
@@ -126,15 +128,14 @@ impl Board {
         use pieces::*;
         let mut b = Board {
             mailbox: [
-                WROOK,  WKNIGHT,    WBISHOP,    WQUEEN, WKING,  WBISHOP,    WKNIGHT,    WROOK,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
-                WPAWN,  WPAWN,      WPAWN,      WPAWN,  WPAWN,  WPAWN,      WPAWN,      WPAWN,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
-                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,             
-                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,             
-                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,             
-                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,             
-                BPAWN,  BPAWN,      BPAWN,      BPAWN,  BPAWN,  BPAWN,      BPAWN,      BPAWN,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
-                BROOK,  BKNIGHT,    BBISHOP,    BQUEEN, BKING,  BBISHOP,    BKNIGHT,    BROOK,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   
-
+                WROOK,  WKNIGHT,    WBISHOP,    WQUEEN, WKING,  WBISHOP,    WKNIGHT,    WROOK,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                WPAWN,  WPAWN,      WPAWN,      WPAWN,  WPAWN,  WPAWN,      WPAWN,      WPAWN,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                NONE,   NONE,       NONE,       NONE,   NONE,   NONE,       NONE,       NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                BPAWN,  BPAWN,      BPAWN,      BPAWN,  BPAWN,  BPAWN,      BPAWN,      BPAWN,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
+                BROOK,  BKNIGHT,    BBISHOP,    BQUEEN, BKING,  BBISHOP,    BKNIGHT,    BROOK,  NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,   NONE,
             ],
             unmake_stack: Vec::new(),
             side_to_move: WHITE,
@@ -207,7 +208,7 @@ impl Board {
                     self.zobrist_toggle(zob_piece, coord0x88_to8x8(kc + o0x88(-1, 0)));
                     self.zobrist_toggle(zob_piece, coord0x88_to8x8(kc + o0x88(-4, 0)));
                 }
-                _ => panic!("Castling not with value CR_KING or CR_QUEEN")
+                _ => panic!("Castling not with value CR_KING or CR_QUEEN"),
             }
         } else {
             undo_castling = None;
@@ -233,7 +234,6 @@ impl Board {
             }
         }
 
-
         // Reversible move clock
         if self.occupied(cmove.to) || self[cmove.from].piece_type == PieceType::Pawn {
             self.revmov_clock += 1;
@@ -256,51 +256,69 @@ impl Board {
 
         if self[cmove.from].piece_type == PieceType::Rook {
             match cmove.from {
-                c0x88::a1 => if self.castling[CR_QUEEN + WHITE as usize] { 
-                   self.castling[CR_QUEEN + WHITE as usize] = false;
-                   self.zobrist_toggle_castle(CR_QUEEN, WHITE);
-                },
-                c0x88::h1 => if self.castling[CR_KING + WHITE as usize] { 
-                    self.castling[CR_KING + WHITE as usize] = false;
-                    self.zobrist_toggle_castle(CR_KING, WHITE);
-                },
-                c0x88::a8 => if self.castling[CR_QUEEN + BLACK as usize] { 
-                   self.castling[CR_QUEEN + BLACK as usize] = false;
-                   self.zobrist_toggle_castle(CR_QUEEN, BLACK);
-                },
-                c0x88::h8 => if self.castling[CR_KING + BLACK as usize] { 
-                   self.castling[CR_KING + BLACK as usize] = false;
-                   self.zobrist_toggle_castle(CR_KING, BLACK);
-                },
+                c0x88::a1 => {
+                    if self.castling[CR_QUEEN + WHITE as usize] {
+                        self.castling[CR_QUEEN + WHITE as usize] = false;
+                        self.zobrist_toggle_castle(CR_QUEEN, WHITE);
+                    }
+                }
+                c0x88::h1 => {
+                    if self.castling[CR_KING + WHITE as usize] {
+                        self.castling[CR_KING + WHITE as usize] = false;
+                        self.zobrist_toggle_castle(CR_KING, WHITE);
+                    }
+                }
+                c0x88::a8 => {
+                    if self.castling[CR_QUEEN + BLACK as usize] {
+                        self.castling[CR_QUEEN + BLACK as usize] = false;
+                        self.zobrist_toggle_castle(CR_QUEEN, BLACK);
+                    }
+                }
+                c0x88::h8 => {
+                    if self.castling[CR_KING + BLACK as usize] {
+                        self.castling[CR_KING + BLACK as usize] = false;
+                        self.zobrist_toggle_castle(CR_KING, BLACK);
+                    }
+                }
                 _ => {}
-
             }
         }
 
         // Remove castling rights when rook is captured
         match cmove.to {
-            c0x88::a1 => if self.castling[CR_QUEEN + WHITE as usize] { 
-                self.castling[CR_QUEEN + WHITE as usize] = false;
-                self.zobrist_toggle_castle(CR_QUEEN, WHITE);
-            },
-            c0x88::h1 => if self.castling[CR_KING + WHITE as usize] { 
-                self.castling[CR_KING + WHITE as usize] = false;
-                self.zobrist_toggle_castle(CR_KING, WHITE);
-            },
-            c0x88::a8 => if self.castling[CR_QUEEN + BLACK as usize] { 
-                self.castling[CR_QUEEN + BLACK as usize] = false;
-                self.zobrist_toggle_castle(CR_QUEEN, BLACK);
-            },
-            c0x88::h8 => if self.castling[CR_KING + BLACK as usize] { 
-                self.castling[CR_KING + BLACK as usize] = false;
-                self.zobrist_toggle_castle(CR_KING, BLACK);
-            },
+            c0x88::a1 => {
+                if self.castling[CR_QUEEN + WHITE as usize] {
+                    self.castling[CR_QUEEN + WHITE as usize] = false;
+                    self.zobrist_toggle_castle(CR_QUEEN, WHITE);
+                }
+            }
+            c0x88::h1 => {
+                if self.castling[CR_KING + WHITE as usize] {
+                    self.castling[CR_KING + WHITE as usize] = false;
+                    self.zobrist_toggle_castle(CR_KING, WHITE);
+                }
+            }
+            c0x88::a8 => {
+                if self.castling[CR_QUEEN + BLACK as usize] {
+                    self.castling[CR_QUEEN + BLACK as usize] = false;
+                    self.zobrist_toggle_castle(CR_QUEEN, BLACK);
+                }
+            }
+            c0x88::h8 => {
+                if self.castling[CR_KING + BLACK as usize] {
+                    self.castling[CR_KING + BLACK as usize] = false;
+                    self.zobrist_toggle_castle(CR_KING, BLACK);
+                }
+            }
             _ => {}
         }
 
         // Pawn promotion
         if cmove.promote_to != PieceType::None {
-            let new_piece = Piece {piece_type: cmove.promote_to, color: self.side_to_move};
+            let new_piece = Piece {
+                piece_type: cmove.promote_to,
+                color: self.side_to_move,
+            };
 
             self.zobrist_toggle(self[cmove.from], coord0x88_to8x8(cmove.from));
             self.zobrist_toggle(new_piece, coord0x88_to8x8(cmove.to));
@@ -309,8 +327,8 @@ impl Board {
             self[cmove.from] = pieces::NONE;
 
             promoted = true;
-
-        } else { // Non-promoting move: business as usual
+        } else {
+            // Non-promoting move: business as usual
             self.zobrist_toggle(self[cmove.from], coord0x88_to8x8(cmove.from));
             self.zobrist_toggle(self[cmove.from], coord0x88_to8x8(cmove.to));
             self[cmove.to] = self[cmove.from];
@@ -325,7 +343,7 @@ impl Board {
         //self.in_check = None
         let in_check = std::mem::replace(&mut self.check_cache, None);
         // Now actually push
-        self.unmake_stack.push( Unmove{
+        self.unmake_stack.push(Unmove {
             from: cmove.from,
             to: cmove.to,
             captured: captured,
@@ -335,19 +353,22 @@ impl Board {
             en_passant: undo_ep,
             castling: undo_castling,
             castling_rights: undo_castlerights,
-            zobrist: undo_zobrist
+            zobrist: undo_zobrist,
         });
 
         // Update 'trivial' field(s)
         self.side_to_move = !self.side_to_move;
         self.zobrist_toggle_side();
     }
-    
+
     pub fn unmake(&mut self) {
         self.side_to_move = !self.side_to_move; // At start of function so it's the side that made the move.
         let u = self.unmake_stack.pop().unwrap();
         if u.promoted {
-            self[u.from] = Piece{piece_type: PieceType::Pawn, color: self.side_to_move};
+            self[u.from] = Piece {
+                piece_type: PieceType::Pawn,
+                color: self.side_to_move,
+            };
         } else {
             self[u.from] = self[u.to];
         }
@@ -365,7 +386,10 @@ impl Board {
                 self.en_passant = Some(c);
             }
             EnPassantState::Capture(c) => {
-                self[c] = Piece{piece_type: PieceType::Pawn, color: !self.side_to_move};
+                self[c] = Piece {
+                    piece_type: PieceType::Pawn,
+                    color: !self.side_to_move,
+                };
                 self.en_passant = Some(c);
             }
         }
@@ -387,7 +411,7 @@ impl Board {
                     self[kc + o0x88(-4, 0)] = self[kc + o0x88(-1, 0)];
                     self[kc + o0x88(-1, 0)] = pieces::NONE;
                 }
-                _ => panic!("Uncastling not with value CR_KING or CR_QUEEN")
+                _ => panic!("Uncastling not with value CR_KING or CR_QUEEN"),
             }
         }
     }
@@ -396,7 +420,7 @@ impl Board {
     pub fn occupied(&self, c: Coord0x88) -> bool {
         match self[c].piece_type {
             PieceType::None => false,
-            _ => true
+            _ => true,
         }
     }
 }

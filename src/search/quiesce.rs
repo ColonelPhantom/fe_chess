@@ -1,15 +1,21 @@
+use crate::board;
 use crate::eval::eval;
 use crate::movegen;
-use crate::board;
 use board::Board;
 
-use super::Score;
 use super::NodeType;
+use super::Score;
 
 const MAX_DELTA: crate::eval::ValCp = 1000;
 const SEE_DELTA: crate::eval::ValCp = 100;
 
-pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mut super::transtable::TransTable ) -> Score {
+pub fn quiesce(
+    b: &mut Board,
+    mut alpha: Score,
+    beta: Score,
+    qdepth: i16,
+    tt: &mut super::transtable::TransTable,
+) -> Score {
     let sp;
     let stand_pat;
     let sign = match b.side_to_move {
@@ -21,7 +27,15 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         None => {
             sp = sign * eval(b);
             stand_pat = Score::Value(sp);
-            tt.put(b.zobrist, None, -qdepth, stand_pat, super::NodeType::QuiesceEval, beta, Some(sp));
+            tt.put(
+                b.zobrist,
+                None,
+                -qdepth,
+                stand_pat,
+                super::NodeType::QuiesceEval,
+                beta,
+                Some(sp),
+            );
         }
         Some(tt_entry) => match tt_entry.node_type {
             NodeType::QuiesceEval => {
@@ -45,16 +59,15 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
                 }
             }
             NodeType::None => panic!("Tt.get returned some but type is None"),
+        },
         }
-    }
 
-    if stand_pat >= beta  {
+    if stand_pat >= beta {
         return beta;
     }
-    if alpha < stand_pat  {
+    if alpha < stand_pat {
         alpha = stand_pat;
     }
-
 
     // Delta pruning
     match alpha {
@@ -64,7 +77,9 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         Score::Draw => if sp < 0 - MAX_DELTA {
             return alpha;
         }
-        Score::Win(_d) => {return stand_pat;},
+        Score::Win(_d) => {
+            return stand_pat;
+        }
         Score::Loss(_d) => {}
     };
 
@@ -74,9 +89,7 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
     // if cap_moves.len() == 0 {
     //     tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull, beta, Some(sp));
     // }
-    cap_moves.sort_by_cached_key(|m| {
-        -super::see::see_capt(b, &m, b.side_to_move)
-    });
+    cap_moves.sort_by_cached_key(|m| -super::see::see_capt(b, &m, b.side_to_move));
     for m in cap_moves {
         // TODO: reuse the value used for sorting
         let see = super::see::see_capt(b, &m, b.side_to_move);
@@ -98,12 +111,20 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         let score = -quiesce(b, -beta, -alpha, qdepth + 1, tt);
         b.unmake();
 
-        if score >= beta  {
-            tt.put(b.zobrist, Some(m), -qdepth, score, super::NodeType::QuiesceCut, beta, Some(sp));
+        if score >= beta {
+            tt.put(
+                b.zobrist,
+                Some(m),
+                -qdepth,
+                score,
+                super::NodeType::QuiesceCut,
+                beta,
+                Some(sp),
+            );
             return beta;
         }
         
-        if score > alpha  {
+        if score > alpha {
             alpha = score;
         }
         if score > local_alpha {
@@ -112,7 +133,15 @@ pub fn quiesce(b: &mut Board, mut alpha: Score, beta:Score, qdepth: i16, tt: &mu
         }
     }
 
-    tt.put(b.zobrist, None, -qdepth, local_alpha, NodeType::QuiesceFull, beta, Some(sp));
+    tt.put(
+        b.zobrist,
+        None,
+        -qdepth,
+        local_alpha,
+        NodeType::QuiesceFull,
+        beta,
+        Some(sp),
+    );
 
     return local_alpha;
 }

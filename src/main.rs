@@ -7,7 +7,6 @@ macro_rules! measure_time {
     };
 }
 
-
 #[macro_use]
 mod board;
 mod eval;
@@ -16,9 +15,7 @@ mod movegen;
 mod search;
 mod ui;
 
-
 fn main() {
-
     let arg = std::env::args().nth(1);
     if arg.is_some() {
         match arg.unwrap().trim() {
