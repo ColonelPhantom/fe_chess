@@ -35,24 +35,17 @@ impl Board {
         macro_rules! slide_threat {
             ($offset:expr, $types:pat) => {
                 let mut to = c + $offset;
-                if to.0 & 0x88 == 0
-                    && self[to].piece_type == PieceType::King
-                    && self[to].color != side
-                {
-                    threats.push(to);
-                } else {
-                    while to.0 & 0x88 == 0 {
-                        if self.occupied(to) {
-                            if self[to].color != side {
-                                match self[to].piece_type {
-                                    $types | PieceType::Queen => threats.push(to),
-                                    _ => {}
-                                }
+                while to.0 & 0x88 == 0 {
+                    if self.occupied(to) {
+                        if self[to].color != side {
+                            match self[to].piece_type {
+                                $types | PieceType::Queen => threats.push(to),
+                                _ => {}
                             }
-                            break;
                         }
-                        to += $offset;
+                        break;
                     }
+                    to += $offset;
                 }
             };
         }
@@ -78,6 +71,16 @@ impl Board {
         nonslide_threat!(o0x88(2, -1), PieceType::Knight);
         nonslide_threat!(o0x88(-2, -1), PieceType::Knight);
 
+        // Kings
+        nonslide_threat!(o0x88(-1, -1), PieceType::King);
+        nonslide_threat!(o0x88(-1, 0), PieceType::King);
+        nonslide_threat!(o0x88(-1, 1), PieceType::King);
+        nonslide_threat!(o0x88(0, -1), PieceType::King);
+        nonslide_threat!(o0x88(0, 1), PieceType::King);
+        nonslide_threat!(o0x88(1, -1), PieceType::King);
+        nonslide_threat!(o0x88(1, 0), PieceType::King);
+        nonslide_threat!(o0x88(1, 1), PieceType::King);
+
         // Diagonal (bishop + queen)
         slide_threat!(o0x88(1, 1), PieceType::Bishop);
         slide_threat!(o0x88(1, -1), PieceType::Bishop);
@@ -90,7 +93,7 @@ impl Board {
         slide_threat!(o0x88(0, 1), PieceType::Rook);
         slide_threat!(o0x88(0, -1), PieceType::Rook);
 
-        match threats.len() {
+        match threats.len() { 
             0 => ThreatInfo::Safe,
             1 => ThreatInfo::Single(threats[0]),
             _ => ThreatInfo::Multiple(threats),
