@@ -85,14 +85,12 @@ pub fn quiesce(
 
     let mut local_alpha = stand_pat;
 
-    let mut cap_moves = movegen::capturegen::cap_gen(b);
+    let mut cap_moves_see: Vec<_> = movegen::capturegen::cap_gen(b).into_iter().map(|m| (m, super::see::see_capt(b, &m, b.side_to_move))).collect();
     // if cap_moves.len() == 0 {
     //     tt.put(b.zobrist, None, -qdepth, stand_pat, NodeType::QuiesceFull, beta, Some(sp));
     // }
-    cap_moves.sort_by_cached_key(|m| -super::see::see_capt(b, &m, b.side_to_move));
-    for m in cap_moves {
-        // TODO: reuse the value used for sorting
-        let see = super::see::see_capt(b, &m, b.side_to_move);
+    cap_moves_see.sort_unstable_by_key(|t| -t.1);
+    for (m, see) in cap_moves_see {
         if see < 0 {
             //println!("SEE cut");
             break;
