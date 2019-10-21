@@ -124,6 +124,16 @@ pub fn alpha_beta(
     // }
 
     for m in moves {
+        // LMR reduction update
+        nodes_searched += 1;
+        if depthleft > 2
+            && lmr_reduction < NODES_REDUCE.len()
+            && lmr_reduction < depthleft - 3
+            && nodes_searched > NODES_REDUCE[lmr_reduction]
+        {
+            lmr_reduction += 1;
+        }
+
         b.make(&m);
         if !b.is_check(!b.side_to_move).is_safe() {
             b.unmake();
@@ -178,15 +188,6 @@ pub fn alpha_beta(
             best_move = Some(m.clone());
             local_alpha = score;
         }
-        // LMR reduction update
-        if depthleft > 2
-            && lmr_reduction < NODES_REDUCE.len()
-            && lmr_reduction < depthleft - 1
-            && nodes_searched >= NODES_REDUCE[lmr_reduction]
-        {
-            lmr_reduction += 1;
-        }
-        nodes_searched += 1;
     }
 
     match !(local_alpha < alpha) {
