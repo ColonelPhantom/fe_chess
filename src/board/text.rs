@@ -97,11 +97,11 @@ impl std::fmt::Display for Move {
             std::char::from_u32('1' as u32 + ((self.to.0 >> 4) & 0x7) as u32)
                 .expect("Error trying to turn move into text"),
             match self.promote_to {
-                PieceType::Queen => 'q',
-                PieceType::Knight => 'n',
-                PieceType::Bishop => 'b',
-                PieceType::Rook => 'r',
-                _ => '\0',
+                PieceType::Queen => "q",
+                PieceType::Knight => "n",
+                PieceType::Bishop => "b",
+                PieceType::Rook => "r",
+                _ => "",
             }            
         )
     }
