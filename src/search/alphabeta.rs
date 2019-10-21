@@ -148,6 +148,7 @@ pub fn alpha_beta(
         }
 
         write!(treedump, "{}", seperator);
+        seperator = ", ";
         b.make(&m);
         if !b.is_check(!b.side_to_move).is_safe() {
             write!(treedump,
