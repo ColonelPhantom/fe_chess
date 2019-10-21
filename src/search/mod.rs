@@ -135,10 +135,18 @@ pub struct SearchInfoIntm {
 }
 
 pub fn search(b: &mut Board, depth: usize, tt: &mut transtable::TransTable) -> SearchInfo {
-    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, tt);
+    let mut treedump = std::fs::File::create(format!("FE_TREEDUMP_{}_depth_001_of_{:03}.json", b.zobrist, depth)).expect("Error opening treedump file");
+    use std::io::Write;
+    write!(treedump, "[");
+    let mut si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), 1, tt, &mut treedump);
+    write!(treedump, "]");
     let mut nodes = si.nodes;
     for d in 2..=depth {
-        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, tt);
+        let mut treedump = std::fs::File::create(format!("FE_TREEDUMP_{}_depth_{:03}_of_{:03}.json", b.zobrist, d, depth))
+            .expect("Error opening treedump file");
+        write!(treedump, "[");
+        si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), d, tt, &mut treedump);
+        write!(treedump, "]");
         nodes += si.nodes;
     }
     // let si = alphabeta::alpha_beta(b, Score::Loss(0), Score::Win(0), depth, tt);
