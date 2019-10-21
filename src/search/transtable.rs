@@ -23,7 +23,7 @@ fn compress_en_passant(ep: &board::EnPassantState) -> u8 {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 struct MoveCompact {
     from: u8,
     to: u8,
@@ -70,6 +70,15 @@ impl MoveCompact {
             en_passant: expand_en_passant(self.en_passant),
             promote_to: self.promote_to,
         })
+    }
+}
+impl std::fmt::Debug for MoveCompact {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // write!(f, "{:?}", self.to_move())
+        match self.to_move() {
+            Some(m) => write!(f, "Some({})", m),
+            None => write!(f, "None"),
+        }
     }
 }
 
