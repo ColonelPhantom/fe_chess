@@ -43,7 +43,7 @@ pub fn c0x88(file: isize, rank: isize) -> Coord0x88 {
     Wrapping(16 * rank as usize) + Wrapping(file as usize)
 }
 
-pub fn c8x8(file: isize, rank: isize) -> Coord8x8 {
+pub const fn c8x8(file: isize, rank: isize) -> Coord8x8 {
     (8 * rank + file) as usize
 }
 
@@ -52,7 +52,7 @@ pub fn o0x88(file: isize, rank: isize) -> Coord0x88 {
     Wrapping(((rank * 0x10) + file) as usize)
 }
 
-pub fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
+pub const fn coord0x88_to8x8(sq0x88: Coord0x88) -> Coord8x8 {
     (sq0x88.0 + (sq0x88.0 & 0x7)) >> 1
 }
 #[allow(dead_code)]
