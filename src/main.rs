@@ -5,6 +5,13 @@ macro_rules! measure_time {
         $op;
         println!($message, start.elapsed().as_millis());
     };
+    ($op:expr) => {
+        {
+            let start = std::time::Instant::now();
+            $op;
+            start.elapsed().as_millis()
+        }
+    }
 }
 
 #[macro_use]
