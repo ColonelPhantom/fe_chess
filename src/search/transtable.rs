@@ -74,6 +74,7 @@ impl MoveCompact {
 }
 
 #[derive(Copy, Clone, Debug)]
+#[repr(packed, C)]
 pub struct TtEntry {
     pub full_zobrist: u64,
     first_move: MoveCompact,
